@@ -1,0 +1,73 @@
+{
+  "kind": "build_request",
+  "title": "Fix Admin Invite status not updating from Unused to Used after redemption",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Fix backend invite redemption so that an invite code is reliably marked as used (used=true, usedAt set, usedBy set) when the recipient redeems it, and ensure the admin invite listing API reads from the same source of truth that is updated on redemption.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "masalah di aplikasi pencurian ponsel, itu link yang tanggal 6 sudah di bagikan dan sudah di gunakan. kenaoa posisi nya masih Unused. Harusnya Use"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Given an admin-generated invite code, when a non-user principal redeems the code via redeemInviteCode, then subsequent admin queries show that code with used=true.",
+        "When an invite code is redeemed, usedAt is non-null and usedBy is non-null for that code when viewed by an admin.",
+        "Redeeming an already-used or deactivated invite code continues to be rejected with an error (no regression in validation)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the frontend Admin Invite Management page data source to display invite status based on the backend API that includes per-code usage status (used/usedAt/usedBy/deactivated), and ensure the UI correctly renders \"Used\" vs \"Unused\" for invites that have been redeemed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "itu link yang tanggal 6 sudah di bagikan dan sudah di gunakan. kenaoa posisi nya masih Unused. Harusnya Use"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the Admin Invite Management page, an invite that has been redeemed displays the \"Used\" badge after a refresh/auto-refresh.",
+        "An invite that has not been redeemed displays the \"Unused\" badge.",
+        "No TypeScript runtime/type errors occur in AdminInviteManagementPage when rendering invite rows (code/created/status)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "After a successful invite redemption in the InviteGate flow, ensure the frontend invalidates/refetches any admin invite list queries as needed so that an admin viewing the invite list can see updated usage without requiring a full hard reload (while keeping the existing accessState/profile invalidations).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "status tidak berubah... Perlu build perbaikan supaya ketika link dipakai, langsung otomatis jadi \"Used\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "After redeeming an invite code, any active React Query cache for the admin invite list can be refreshed to show the updated status without a full-page reload.",
+        "Existing behavior remains: InviteGate still invalidates accessState and currentUserProfile after redemption."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not modify files under frontend/src/components/ui or other paths listed as immutable in SYSTEM_CONTEXT."
+  ],
+  "nonGoals": [
+    "Changing Caffeine credit/cycles consumption behavior.",
+    "Adding new authentication providers (must remain Internet Identity).",
+    "Implementing payments or automating payment verification flows."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

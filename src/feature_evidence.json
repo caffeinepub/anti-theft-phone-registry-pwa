@@ -1,0 +1,47 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-frontend-admin-invite-management-page-data-source-to-display-invite-status-based-on-the-backend-api-that-includes-per-code-usage-status-used-usedat-usedby-deactivated-and-ensure-the-ui-correctly-renders-used-vs-unused-for-invites-that-have-been-redeemed",
+      "featureTitle": "Update the frontend Admin Invite Management page data source to display invite status based on the backend API that includes per-code usage status (used/usedAt/usedBy/deactivated), and ensure the UI correctly renders \"Used\" vs \"Unused\" for invites that have been redeemed.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminInviteManagementPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-a-successful-invite-redemption-in-the-invitegate-flow-ensure-the-frontend-invalidates-refetches-any-admin-invite-list-queries-as-needed-so-that-an-admin-viewing-the-invite-list-can-see-updated-usage-without-requiring-a-full-hard-reload-while-keeping-the-existing-accessstate-profile-invalidations",
+      "featureTitle": "After a successful invite redemption in the InviteGate flow, ensure the frontend invalidates/refetches any admin invite list queries as needed so that an admin viewing the invite list can see updated usage without requiring a full hard reload (while keeping the existing accessState/profile invalidations).",
+      "files": [
+        "frontend/src/components/InviteGate.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

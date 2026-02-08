@@ -1,0 +1,48 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Admin invite status UI uses invite status source-of-truth and refreshes after redemption",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Update Admin Invite Management page to read invite status (used/usedAt/usedBy/deactivated) from the backend capability that returns per-code usage status and render Used vs Unused accurately.",
+      "acceptanceCriteria": [
+        "On the Admin Invite Management page, an invite that has been redeemed displays the \"Used\" badge after a refresh/auto-refresh.",
+        "An invite that has not been redeemed displays the \"Unused\" badge.",
+        "No TypeScript runtime/type errors occur in AdminInviteManagementPage when rendering invite rows (code/created/status)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a React Query hook that loads invite codes via the backend capability that includes per-code usage status (used/usedAt/usedBy/deactivated), with the same admin-only enable/refresh behavior. Use existing authorization-based accessState checks to keep this admin-only. Verify the component's usage instructions before implementing (authorization, invite-links)."
+        },
+        {
+          "path": "frontend/src/pages/AdminInviteManagementPage.tsx",
+          "operation": "modify",
+          "description": "Switch the page data source from useGetInviteCodes() to the new per-code status hook, and update row rendering to derive the \"Used\" vs \"Unused\" badge from the returned status fields. Ensure types align with InviteCodeWithStatus (optional usedAt/usedBy, deactivated) and keep the table stable with no TypeScript errors. Verify the component's usage instructions before implementing (authorization, invite-links)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "After invite redemption in InviteGate, invalidate/refetch admin invite list queries so invite usage status updates without a hard reload, while keeping existing accessState/profile invalidations.",
+      "acceptanceCriteria": [
+        "After redeeming an invite code, any active React Query cache for the admin invite list can be refreshed to show the updated status without a full-page reload.",
+        "Existing behavior remains: InviteGate still invalidates accessState and currentUserProfile after redemption."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InviteGate.tsx",
+          "operation": "modify",
+          "description": "After a successful redeemInviteCode call, keep invalidation of accessState and currentUserProfile, and additionally invalidate any admin invite list query keys used by Admin Invite Management (e.g., inviteCodesWithStatus and legacy inviteCodes) so an admin can see updated \"Used\" status without a full hard reload. Verify the component's usage instructions before implementing (authorization, invite-links)."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Ensure the admin invite list query key(s) are well-defined and consistently used (including any new per-code status hook) so InviteGate can reliably invalidate them post-redemption. Verify the component's usage instructions before implementing (authorization, invite-links)."
+        }
+      ]
+    }
+  ]
+}

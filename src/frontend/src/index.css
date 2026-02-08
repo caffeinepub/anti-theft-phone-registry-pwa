@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.75rem;
+        
+        /* Light mode - Modern blue/indigo theme */
+        --background: 0.99 0 0;
+        --foreground: 0.15 0 0;
+        --card: 1 0 0;
+        --card-foreground: 0.15 0 0;
+        --popover: 1 0 0;
+        --popover-foreground: 0.15 0 0;
+        
+        /* Primary: Blue */
+        --primary: 0.55 0.18 250;
+        --primary-foreground: 0.99 0 0;
+        
+        /* Secondary: Light gray */
+        --secondary: 0.96 0 0;
+        --secondary-foreground: 0.15 0 0;
+        
+        /* Muted */
+        --muted: 0.96 0 0;
+        --muted-foreground: 0.50 0 0;
+        
+        /* Accent: Indigo */
+        --accent: 0.94 0.02 270;
+        --accent-foreground: 0.15 0 0;
+        
+        /* Destructive: Red */
+        --destructive: 0.55 0.22 25;
+        --destructive-foreground: 0.99 0 0;
+        
+        /* Borders and inputs */
+        --border: 0.90 0 0;
+        --input: 0.90 0 0;
+        --ring: 0.55 0.18 250;
+        
+        /* Charts */
+        --chart-1: 0.55 0.18 250;
+        --chart-2: 0.60 0.15 180;
+        --chart-3: 0.65 0.20 140;
+        --chart-4: 0.70 0.18 320;
+        --chart-5: 0.75 0.16 40;
+    }
+
+    .dark {
+        /* Dark mode - Deep blue/gray theme */
+        --background: 0.15 0.01 250;
+        --foreground: 0.95 0 0;
+        --card: 0.20 0.01 250;
+        --card-foreground: 0.95 0 0;
+        --popover: 0.18 0.01 250;
+        --popover-foreground: 0.95 0 0;
+        
+        /* Primary: Bright blue */
+        --primary: 0.70 0.20 250;
+        --primary-foreground: 0.15 0 0;
+        
+        /* Secondary: Dark gray */
+        --secondary: 0.25 0.01 250;
+        --secondary-foreground: 0.95 0 0;
+        
+        /* Muted */
+        --muted: 0.25 0.01 250;
+        --muted-foreground: 0.65 0 0;
+        
+        /* Accent: Light indigo */
+        --accent: 0.35 0.03 270;
+        --accent-foreground: 0.95 0 0;
+        
+        /* Destructive: Bright red */
+        --destructive: 0.60 0.25 25;
+        --destructive-foreground: 0.95 0 0;
+        
+        /* Borders and inputs */
+        --border: 0.30 0.01 250;
+        --input: 0.30 0.01 250;
+        --ring: 0.70 0.20 250;
+        
+        /* Charts */
+        --chart-1: 0.60 0.22 250;
+        --chart-2: 0.65 0.18 180;
+        --chart-3: 0.70 0.22 140;
+        --chart-4: 0.75 0.20 320;
+        --chart-5: 0.80 0.18 40;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        @apply bg-muted;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        @apply bg-muted-foreground/30 rounded-full;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-muted-foreground/50;
+    }
+}

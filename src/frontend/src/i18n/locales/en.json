@@ -1,0 +1,138 @@
+{
+  "app": {
+    "loading": "Loading application..."
+  },
+  "login": {
+    "title": "Anti-Theft Phone Registration",
+    "subtitle": "Protect your phone and prevent stolen phone sales with a trusted registration system",
+    "loginButton": "Login with Internet Identity",
+    "loggingIn": "Logging in...",
+    "secureLogin": "Secure login system using Internet Identity",
+    "features": {
+      "register": {
+        "title": "Register Phone",
+        "description": "Record your phone ownership with IMEI"
+      },
+      "report": {
+        "title": "Report Loss",
+        "description": "Report lost or stolen phones quickly"
+      },
+      "check": {
+        "title": "Check IMEI Status",
+        "description": "Check phone status before buying"
+      },
+      "secure": {
+        "title": "Safe & Trusted",
+        "description": "Data stored securely on blockchain"
+      }
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "phones": "Phones",
+    "report": "Report",
+    "check": "Check",
+    "notifications": "Notif",
+    "statistics": "Statistics",
+    "about": "About",
+    "profile": "Profile",
+    "admin": "Admin",
+    "reportLost": "Report Lost/Stolen",
+    "reportFound": "Report Found"
+  },
+  "about": {
+    "title": "About Application",
+    "subtitle": "Complete information about this application",
+    "purpose": {
+      "title": "Application Purpose",
+      "description": "The <strong>Anti-Theft Phone</strong> application is designed to prevent the sale of stolen phones by providing a trusted and transparent ownership registration system.",
+      "intro": "Through this application, users can:",
+      "features": {
+        "register": "Register phone ownership with IMEI number",
+        "check": "Check phone status through IMEI search before buying",
+        "report": "Report lost or stolen phones",
+        "transfer": "Transfer ownership when selling phones"
+      }
+    },
+    "blockchain": {
+      "title": "Blockchain Technology Advantages",
+      "description": "This application uses <strong>blockchain technology</strong> to ensure data integrity:",
+      "benefits": {
+        "tamperProof": {
+          "title": "Tamper-Proof",
+          "description": "Data stored on blockchain cannot be changed or manipulated"
+        },
+        "transparent": {
+          "title": "Transparent",
+          "description": "All transactions and status changes can be tracked and verified"
+        },
+        "secure": {
+          "title": "Secure",
+          "description": "Decentralized system protects against single point of failure"
+        }
+      }
+    },
+    "dataProtection": {
+      "title": "User Data Protection",
+      "description": "Your privacy and data security are our top priorities:",
+      "features": {
+        "encryption": "<strong>Data Encryption:</strong> All user data is encrypted using high security standards",
+        "anonymization": "<strong>Anonymization:</strong> Personal information is anonymized to protect your identity",
+        "control": "<strong>Full Control:</strong> You have full control over the data you share",
+        "noThirdParty": "<strong>No Third Parties:</strong> Data is not shared with third parties without your permission"
+      }
+    },
+    "keyFeatures": {
+      "title": "Key Features",
+      "register": {
+        "title": "Phone Registration",
+        "description": "Register your phone with IMEI to record official ownership"
+      },
+      "transfer": {
+        "title": "Ownership Transfer",
+        "description": "Transfer ownership securely when selling your phone"
+      },
+      "check": {
+        "title": "Check IMEI",
+        "description": "Check phone status before buying to avoid stolen phones"
+      },
+      "notifications": {
+        "title": "Secure Notifications",
+        "description": "Receive real-time notifications about your phone activities"
+      }
+    },
+    "help": {
+      "title": "Help & Support",
+      "description": "If you have questions or need assistance, please contact us:"
+    },
+    "developer": {
+      "label": "Developed by"
+    }
+  },
+  "toast": {
+    "profileSaved": "Profile saved successfully",
+    "profileSaveFailed": "Failed to save profile",
+    "pinSet": "PIN set successfully",
+    "pinSetFailed": "Failed to set PIN",
+    "pinIncorrect": "Current PIN is incorrect",
+    "inviteGenerated": "Invite code generated successfully",
+    "inviteGenerateFailed": "Failed to generate invite code",
+    "adminOnly": "Only admins can generate invite codes",
+    "phoneRegistered": "Phone registered successfully",
+    "phoneRegisterFailed": "Failed to register phone",
+    "releaseSubmitted": "Ownership release request submitted successfully. An admin will review your request.",
+    "releaseFailed": "Failed to release ownership",
+    "invalidPin": "Invalid PIN. Please enter the correct 4-digit PIN.",
+    "pinRequired": "You must set a 4-digit PIN before you can release a phone. Please set your PIN in Profile settings.",
+    "unauthorizedRelease": "Only the phone owner can release ownership",
+    "reportSubmitted": "Report submitted successfully",
+    "reportFailed": "Failed to submit report",
+    "foundReportSubmitted": "Found report submitted successfully! The owner will be notified.",
+    "notificationMarkFailed": "Failed to mark notification",
+    "allNotificationsRead": "All notifications marked as read",
+    "notificationsMarkFailed": "Failed to mark notifications"
+  },
+  "footer": {
+    "copyright": "© 2026 Pasar Digital Community"
+  }
+}

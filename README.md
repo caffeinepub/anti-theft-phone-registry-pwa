@@ -1,2 +1,3 @@
-# anti-theft-phone-registry-pwa
-Exported from Caffeine project: Fix admin invite token status not updating from Unused to Used after redemption
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

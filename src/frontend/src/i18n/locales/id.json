@@ -1,0 +1,138 @@
+{
+  "app": {
+    "loading": "Memuat aplikasi..."
+  },
+  "login": {
+    "title": "Registrasi Anti-Pencurian Ponsel",
+    "subtitle": "Lindungi ponsel Anda dan cegah penjualan ponsel curian dengan sistem registrasi terpercaya",
+    "loginButton": "Masuk dengan Internet Identity",
+    "loggingIn": "Masuk...",
+    "secureLogin": "Sistem login aman menggunakan Internet Identity",
+    "features": {
+      "register": {
+        "title": "Daftarkan Ponsel",
+        "description": "Catat kepemilikan ponsel Anda dengan IMEI"
+      },
+      "report": {
+        "title": "Laporkan Kehilangan",
+        "description": "Laporkan ponsel hilang atau dicuri dengan cepat"
+      },
+      "check": {
+        "title": "Cek Status IMEI",
+        "description": "Periksa status ponsel sebelum membeli"
+      },
+      "secure": {
+        "title": "Aman & Terpercaya",
+        "description": "Data tersimpan aman di blockchain"
+      }
+    }
+  },
+  "tabs": {
+    "home": "Beranda",
+    "phones": "Ponsel",
+    "report": "Lapor",
+    "check": "Cek",
+    "notifications": "Notif",
+    "statistics": "Statistik",
+    "about": "Tentang",
+    "profile": "Profil",
+    "admin": "Admin",
+    "reportLost": "Lapor Hilang/Dicuri",
+    "reportFound": "Lapor Ditemukan"
+  },
+  "about": {
+    "title": "Tentang Aplikasi",
+    "subtitle": "Informasi lengkap tentang aplikasi ini",
+    "purpose": {
+      "title": "Tujuan Aplikasi",
+      "description": "Aplikasi <strong>Anti-Pencurian Ponsel</strong> dirancang untuk mencegah penjualan ponsel curian dengan menyediakan sistem registrasi kepemilikan yang terpercaya dan transparan.",
+      "intro": "Melalui aplikasi ini, pengguna dapat:",
+      "features": {
+        "register": "Mendaftarkan kepemilikan ponsel dengan nomor IMEI",
+        "check": "Memeriksa status ponsel melalui pencarian IMEI sebelum membeli",
+        "report": "Melaporkan ponsel yang hilang atau dicuri",
+        "transfer": "Mentransfer kepemilikan saat menjual ponsel"
+      }
+    },
+    "blockchain": {
+      "title": "Keunggulan Teknologi Blockchain",
+      "description": "Aplikasi ini menggunakan <strong>teknologi blockchain</strong> untuk menjamin integritas data:",
+      "benefits": {
+        "tamperProof": {
+          "title": "Sulit Dipalsukan",
+          "description": "Data tersimpan di blockchain yang tidak dapat diubah atau dimanipulasi"
+        },
+        "transparent": {
+          "title": "Transparan",
+          "description": "Semua transaksi dan perubahan status dapat dilacak dan diverifikasi"
+        },
+        "secure": {
+          "title": "Aman",
+          "description": "Sistem terdesentralisasi melindungi dari kegagalan sistem tunggal"
+        }
+      }
+    },
+    "dataProtection": {
+      "title": "Perlindungan Data Pengguna",
+      "description": "Privasi dan keamanan data Anda adalah prioritas utama kami:",
+      "features": {
+        "encryption": "<strong>Enkripsi Data:</strong> Semua data pengguna dienkripsi menggunakan standar keamanan tinggi",
+        "anonymization": "<strong>Anonimisasi:</strong> Informasi pribadi dianonimkan untuk melindungi identitas Anda",
+        "control": "<strong>Kontrol Penuh:</strong> Anda memiliki kontrol penuh atas data yang Anda bagikan",
+        "noThirdParty": "<strong>Tidak Ada Pihak Ketiga:</strong> Data tidak dibagikan kepada pihak ketiga tanpa izin Anda"
+      }
+    },
+    "keyFeatures": {
+      "title": "Fitur Utama",
+      "register": {
+        "title": "Registrasi Ponsel",
+        "description": "Daftarkan ponsel Anda dengan IMEI untuk mencatat kepemilikan resmi"
+      },
+      "transfer": {
+        "title": "Transfer Kepemilikan",
+        "description": "Transfer kepemilikan dengan aman saat menjual ponsel Anda"
+      },
+      "check": {
+        "title": "Cek IMEI",
+        "description": "Periksa status ponsel sebelum membeli untuk menghindari ponsel curian"
+      },
+      "notifications": {
+        "title": "Notifikasi Aman",
+        "description": "Terima notifikasi real-time tentang aktivitas ponsel Anda"
+      }
+    },
+    "help": {
+      "title": "Bantuan & Dukungan",
+      "description": "Jika Anda memiliki pertanyaan atau memerlukan bantuan, silakan hubungi kami:"
+    },
+    "developer": {
+      "label": "Dikembangkan oleh"
+    }
+  },
+  "toast": {
+    "profileSaved": "Profil berhasil disimpan",
+    "profileSaveFailed": "Gagal menyimpan profil",
+    "pinSet": "PIN berhasil diatur",
+    "pinSetFailed": "Gagal mengatur PIN",
+    "pinIncorrect": "PIN saat ini salah",
+    "inviteGenerated": "Kode undangan berhasil dibuat",
+    "inviteGenerateFailed": "Gagal membuat kode undangan",
+    "adminOnly": "Hanya admin yang dapat membuat kode undangan",
+    "phoneRegistered": "Ponsel berhasil didaftarkan",
+    "phoneRegisterFailed": "Gagal mendaftarkan ponsel",
+    "releaseSubmitted": "Permintaan pelepasan kepemilikan berhasil diajukan. Admin akan meninjau permintaan Anda.",
+    "releaseFailed": "Gagal melepaskan kepemilikan",
+    "invalidPin": "PIN tidak valid. Silakan masukkan PIN 4 digit yang benar.",
+    "pinRequired": "Anda harus mengatur PIN 4 digit sebelum dapat melepaskan ponsel. Silakan atur PIN Anda di pengaturan Profil.",
+    "unauthorizedRelease": "Hanya pemilik ponsel yang dapat melepaskan kepemilikan",
+    "reportSubmitted": "Laporan berhasil dikirim",
+    "reportFailed": "Gagal mengirim laporan",
+    "foundReportSubmitted": "Laporan penemuan berhasil dikirim! Pemilik akan diberitahu.",
+    "notificationMarkFailed": "Gagal menandai notifikasi",
+    "allNotificationsRead": "Semua notifikasi ditandai sudah dibaca",
+    "notificationsMarkFailed": "Gagal menandai notifikasi"
+  },
+  "footer": {
+    "copyright": "© 2026 Pasar Digital Community"
+  }
+}

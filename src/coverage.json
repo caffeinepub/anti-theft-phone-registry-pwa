@@ -1,0 +1,63 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T14:41:33.472Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 3,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Fix backend invite redemption so that an invite code is reliably marked as used (used=true, usedAt set, usedBy set) when the recipient redeems it, and ensure the admin invite listing API reads from the same source of truth that is updated on redemption.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Update the frontend Admin Invite Management page data source to display invite status based on the backend API that includes per-code usage status (used/usedAt/usedBy/deactivated), and ensure the UI correctly renders \"Used\" vs \"Unused\" for invites that have been redeemed.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminInviteManagementPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminInviteManagementPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "After a successful invite redemption in the InviteGate flow, ensure the frontend invalidates/refetches any admin invite list queries as needed so that an admin viewing the invite list can see updated usage without requiring a full hard reload (while keeping the existing accessState/profile invalidations).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/InviteGate.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/InviteGate.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/InviteGate.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminInviteManagementPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

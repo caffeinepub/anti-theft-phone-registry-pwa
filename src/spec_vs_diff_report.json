@@ -1,0 +1,35 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T14:41:33.469Z",
+  "summary": "Frontend changes implement invite-status-aware admin listing (via a new/updated `useGetInviteCodesWithStatus` hook and updated Admin Invite Management UI) and add React Query invalidations after invite redemption. Backend changes show introduction of an `InviteCodeWithStatus` record and an `invitesWithStatus` map, but the diff excerpt is truncated before any evidence of `redeemInviteCode` actually persisting used/usedAt/usedBy or the admin listing API reading from the same updated source of truth.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Fix backend invite redemption so that an invite code is reliably marked as used (used=true, usedAt set, usedBy set) when redeemed, and ensure the admin invite listing API reads from the same source of truth that is updated on redemption.",
+      "reason": "The provided backend diff excerpt only shows new types/storage (`InviteCodeWithStatus`, `invitesWithStatus`) but does not include any visible changes to `redeemInviteCode` or the admin invite listing/query method(s) that would prove used/usedAt/usedBy are set on redemption and later returned to admins from the same storage. Because the file is truncated, this cannot be confirmed from the evidence shown.",
+      "evidence": [
+        "backend/main.mo (truncated: shows `type InviteCodeWithStatus` and `let invitesWithStatus = Map.empty<Text, InviteCodeWithStatus>();` but no redemption/listing logic visible)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "PIN management functionality (set/change/validate/clear PIN) and related React Query hooks were added/modified, which is not part of the invite-status bugfix request.",
+      "reason": "BuildRequest focuses on invite redemption status tracking and admin invite list updates; it does not request any PIN feature work.",
+      "evidence": [
+        "backend/main.mo (truncated: `// PIN Management` section with `setOrChangePin`, `validatePin`, `clearPin`, `hasPin`)",
+        "frontend/src/hooks/useQueries.ts (truncated: `useHasPin`, `useSetOrChangePin` and PIN-related invalidations/toasts)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/InviteGate.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminInviteManagementPage.tsx",
+    "project_state.json"
+  ]
+}
