@@ -2,11 +2,32 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-admin-invite-management-page-data-source-to-display-invite-status-based-on-the-backend-api-that-includes-per-code-usage-status-used-usedat-usedby-deactivated-and-ensure-the-ui-correctly-renders-used-vs-unused-for-invites-that-have-been-redeemed",
-      "featureTitle": "Update the frontend Admin Invite Management page data source to display invite status based on the backend API that includes per-code usage status (used/usedAt/usedBy/deactivated), and ensure the UI correctly renders \"Used\" vs \"Unused\" for invites that have been redeemed.",
+      "featureId": "feature-fix-the-release-phone-ownership-flow-so-that-if-releasing-a-phone-fails-the-ui-never-displays-raw-code-json-debug-output-it-must-show-a-clean-user-friendly-error-message-instead-and-keep-the-dialog-usable",
+      "featureTitle": "Fix the \"Release Phone Ownership\" flow so that if releasing a phone fails, the UI never displays raw code/JSON/debug output; it must show a clean, user-friendly error message instead and keep the dialog usable.",
+      "files": [
+        "frontend/src/pages/MyPhonesPage.tsx",
+        "frontend/src/utils/releaseOwnershipErrors.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-harden-error-handling-for-the-release-ownership-mutation-so-it-safely-extracts-a-readable-message-from-internet-computer-agent-errors-reject-message-error-objects-unknown-thrown-values-and-maps-known-backend-trap-strings-e-g-invalid-pin-you-must-set-a-4-digit-pin-unauthorized-to-consistent-english-ui-messages",
+      "featureTitle": "Harden error handling for the release ownership mutation so it safely extracts a readable message from Internet Computer agent errors (reject message, error objects, unknown thrown values) and maps known backend trap strings (e.g., \"Invalid PIN\", \"You must set a 4-digit PIN...\", \"Unauthorized...\") to consistent English UI messages.",
       "files": [
         "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminInviteManagementPage.tsx"
+        "frontend/src/utils/releaseOwnershipErrors.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,27 +40,6 @@
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-after-a-successful-invite-redemption-in-the-invitegate-flow-ensure-the-frontend-invalidates-refetches-any-admin-invite-list-queries-as-needed-so-that-an-admin-viewing-the-invite-list-can-see-updated-usage-without-requiring-a-full-hard-reload-while-keeping-the-existing-accessstate-profile-invalidations",
-      "featureTitle": "After a successful invite redemption in the InviteGate flow, ensure the frontend invalidates/refetches any admin invite list queries as needed so that an admin viewing the invite list can see updated usage without requiring a full hard reload (while keeping the existing accessState/profile invalidations).",
-      "files": [
-        "frontend/src/components/InviteGate.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

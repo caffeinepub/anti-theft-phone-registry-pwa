@@ -218,16 +218,14 @@ export interface backendInterface {
     markNotificationAsRead(notificationId: bigint): Promise<void>;
     redeemInviteCode(inviteCode: string): Promise<void>;
     registerProfile(email: string, city: string): Promise<void>;
-    releasePhoneFinal(requestId: bigint): Promise<void>;
+    releasePhone(imei: string, pin: string): Promise<void>;
     reportFound(imei: string, finderInfo: string | null): Promise<void>;
     reportLostStolen(imei: string, location: string, details: string, isStolen: boolean): Promise<void>;
-    requestPhoneRelease(imei: string, reason: string, pin: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setOrChangePin(newPin: string): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
     transferOwnership(imei: string, newOwner: Principal): Promise<void>;
     validatePin(pin: string): Promise<void>;
-    verifyReleaseRequest(requestId: bigint): Promise<void>;
 }
 import type { EventType as _EventType, IMEIEvent as _IMEIEvent, InviteCodeWithStatus as _InviteCodeWithStatus, Notification as _Notification, NotificationType as _NotificationType, Phone as _Phone, PhoneStatus as _PhoneStatus, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -596,17 +594,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async releasePhoneFinal(arg0: bigint): Promise<void> {
+    async releasePhone(arg0: string, arg1: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.releasePhoneFinal(arg0);
+                const result = await this.actor.releasePhone(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.releasePhoneFinal(arg0);
+            const result = await this.actor.releasePhone(arg0, arg1);
             return result;
         }
     }
@@ -635,20 +633,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.reportLostStolen(arg0, arg1, arg2, arg3);
-            return result;
-        }
-    }
-    async requestPhoneRelease(arg0: string, arg1: string, arg2: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.requestPhoneRelease(arg0, arg1, arg2);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.requestPhoneRelease(arg0, arg1, arg2);
             return result;
         }
     }
@@ -719,20 +703,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.validatePin(arg0);
-            return result;
-        }
-    }
-    async verifyReleaseRequest(arg0: bigint): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.verifyReleaseRequest(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.verifyReleaseRequest(arg0);
             return result;
         }
     }

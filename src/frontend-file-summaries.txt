@@ -1,11 +1,11 @@
 {
   "frontend/src/App.tsx": "Main application component with custom i18n integration, splash screen, authentication flow, access state gating, and profile setup modal with translated loading text.",
-  "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations with internationalized toast messages, including new useGetInviteCodesWithStatus hook that fetches invite codes with full status tracking (used/usedAt/usedBy/deactivated) and automatic refresh every 30 seconds for reliable admin invite status updates.",
+  "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations with internationalized toast messages, including updated useReleasePhone hook that uses safe error extraction utility to prevent raw error objects from being displayed.",
   "frontend/src/components/MainLayout.tsx": "Main layout component with header, language switcher in header, internationalized bottom navigation tabs including conditional admin tab, notification badge, and routing between all pages using custom i18n.",
   "frontend/src/components/ProfileSetupModal.tsx": "Modal dialog for first-time user profile setup, collecting name, email, and city information with form validation.",
   "frontend/src/pages/LoginPage.tsx": "Landing page with language switcher, internationalized hero section, feature highlights, Internet Identity login button, and footer using custom i18n.",
   "frontend/src/pages/HomePage.tsx": "Home page displaying Pasar Digital Community logo, public feed of theft reports, and real-time statistics counters for total reports and total protected phones with proper loading states and automatic refresh when data changes.",
-  "frontend/src/pages/MyPhonesPage.tsx": "Page for managing registered phones with PIN-gated phone registration (requiring PIN during IMEI registration for new users, prompting legacy users to set PIN via notification banner), PIN-gated ownership release requiring 4-digit security PIN and reason selection, and integrated PIN setup dialog for first-time registration flow.",
+  "frontend/src/pages/MyPhonesPage.tsx": "Page for managing registered phones with PIN-gated phone registration and immediate ownership release requiring both 4-digit security PIN and explicit confirmation, with dialog staying open on error to allow retry.",
   "frontend/src/pages/ReportLostPage.tsx": "Page for reporting lost or stolen phones with geolocation support, phone selection, and detailed incident reporting form.",
   "frontend/src/pages/CheckImeiPage.tsx": "Public IMEI checking page with search functionality, visual status indicators (safe, active, lost, stolen) with warnings, and integrated IMEI history timeline display showing complete ownership and status change history.",
   "frontend/src/pages/ProfilePage.tsx": "User profile page displaying account information with integrated security settings section for managing the ownership release PIN, showing PIN status and providing access to PIN management dialog.",
@@ -24,9 +24,10 @@
   "frontend/src/components/PinSettingsDialog.tsx": "Dialog component for setting or changing the 4-digit security PIN required for phone ownership releases, with validation, current PIN verification for changes, optional success callback support for parent flows, and clear user feedback.",
   "frontend/src/components/ImeiHistoryTimeline.tsx": "Timeline component displaying IMEI history events with icons, badges, timestamps, event details, and hand-off count derived from ownership-related events (transfers and re-registrations).",
   "frontend/src/i18n/index.ts": "Custom lightweight i18n implementation with Indonesian (default) and English resources, localStorage persistence, and observer pattern for language changes.",
-  "frontend/src/i18n/locales/id.json": "Indonesian translation resource containing all UI strings matching current hardcoded text.",
-  "frontend/src/i18n/locales/en.json": "English translation resource with equivalent translations for all UI strings.",
+  "frontend/src/i18n/locales/id.json": "Indonesian translation resource with updated release-related toast messages that no longer mention admin review or approval, reflecting immediate ownership release.",
+  "frontend/src/i18n/locales/en.json": "English translation resource with updated release-related toast messages that no longer mention admin review or approval, reflecting immediate ownership release.",
   "frontend/src/components/LanguageSwitcher.tsx": "Reusable language switcher component with dropdown menu for Indonesian/English selection using custom i18n hook.",
   "frontend/package.json": "Package configuration with added i18next and react-i18next dependencies for internationalization support.",
-  "frontend/src/i18n/useTranslation.ts": "React hook for accessing translation function and language state with automatic re-rendering on language changes, properly handling cleanup function return type."
+  "frontend/src/i18n/useTranslation.ts": "React hook for accessing translation function and language state with automatic re-rendering on language changes, properly handling cleanup function return type.",
+  "frontend/src/utils/releaseOwnershipErrors.ts": "Utility for safely extracting user-friendly error messages from release ownership failures, handling IC agent errors, unknown thrown values, and preventing raw JSON/code from appearing in UI."
 }

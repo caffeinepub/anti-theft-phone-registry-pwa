@@ -5,6 +5,7 @@ import { useInternetIdentity } from './useInternetIdentity';
 import { toast } from 'sonner';
 import type { Principal } from '@icp-sdk/core/principal';
 import i18n from '../i18n';
+import { extractReleaseErrorMessage } from '../utils/releaseOwnershipErrors';
 
 // Access State Query
 export function useGetAccessState() {
@@ -209,34 +210,27 @@ export function useAddPhone() {
   });
 }
 
-export function useRequestPhoneRelease() {
+export function useReleasePhone() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ imei, reason, pin }: { imei: string; reason: string; pin: string }) => {
+    mutationFn: async ({ imei, pin }: { imei: string; pin: string }) => {
       if (!actor) throw new Error('Actor not available');
       
-      // Request phone release with PIN
-      return actor.requestPhoneRelease(imei, reason, pin);
+      // Call immediate release method
+      return actor.releasePhone(imei, pin);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPhones'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
-      toast.success(i18n.t('toast.releaseSubmitted'));
+      toast.success('Phone ownership released successfully');
     },
-    onError: (error: Error) => {
-      const message = error.message.toLowerCase();
-      if (message.includes('invalid pin')) {
-        toast.error(i18n.t('toast.invalidPin'));
-      } else if (message.includes('must set a 4-digit pin') || message.includes('no pin set')) {
-        toast.error(i18n.t('toast.pinRequired'));
-      } else if (message.includes('unauthorized')) {
-        toast.error(i18n.t('toast.unauthorizedRelease'));
-      } else {
-        toast.error(i18n.t('toast.releaseFailed') + ': ' + error.message);
-      }
+    onError: (error: unknown) => {
+      // Use the safe error extraction utility
+      const userMessage = extractReleaseErrorMessage(error);
+      toast.error(userMessage);
     },
   });
 }
@@ -411,5 +405,53 @@ export function useGetStatistics() {
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
     staleTime: 0,
+  });
+}
+
+// Admin Check
+export function useIsCurrentUserAdmin() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<boolean>({
+    queryKey: ['isAdmin', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+  });
+}
+
+// Invite Redemption
+export function useRedeemInviteCode() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (inviteCode: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.redeemInviteCode(inviteCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accessState'] });
+      queryClient.invalidateQueries({ queryKey: ['inviteCodesWithStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['inviteCodes'] });
+      toast.success('Invite code redeemed successfully! You now have access.');
+    },
+    onError: (error: Error) => {
+      const message = error.message.toLowerCase();
+      if (message.includes('already been used')) {
+        toast.error('This invite code has already been used');
+      } else if (message.includes('deactivated')) {
+        toast.error('This invite code has been deactivated');
+      } else if (message.includes('invalid')) {
+        toast.error('Invalid invite code');
+      } else if (message.includes('already have user access')) {
+        toast.error('You already have user access');
+      } else {
+        toast.error('Failed to redeem invite code: ' + error.message);
+      }
+    },
   });
 }

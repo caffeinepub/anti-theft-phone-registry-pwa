@@ -1,46 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin invite status UI uses invite status source-of-truth and refreshes after redemption",
+  "title": "Prevent raw/garbled error output in Release Phone Ownership flow",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Update Admin Invite Management page to read invite status (used/usedAt/usedBy/deactivated) from the backend capability that returns per-code usage status and render Used vs Unused accurately.",
+      "id": "REQ-1",
+      "summary": "Ensure Release Phone Ownership failures show a clean user-friendly error and keep the dialog usable (no raw JSON/code rendered).",
       "acceptanceCriteria": [
-        "On the Admin Invite Management page, an invite that has been redeemed displays the \"Used\" badge after a refresh/auto-refresh.",
-        "An invite that has not been redeemed displays the \"Unused\" badge.",
-        "No TypeScript runtime/type errors occur in AdminInviteManagementPage when rendering invite rows (code/created/status)."
+        "When the release action fails (e.g., wrong PIN, unauthorized, phone not found), the app shows an error toast/message in plain English and does not render any raw JSON or code-like output on screen.",
+        "The release dialog remains interactive after an error (user can correct the PIN/confirmation and retry, or cancel).",
+        "No React runtime error occurs from rendering non-string error objects (e.g., objects/arrays/bigints) inside JSX or toasts."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/pages/MyPhonesPage.tsx",
           "operation": "modify",
-          "description": "Add a React Query hook that loads invite codes via the backend capability that includes per-code usage status (used/usedAt/usedBy/deactivated), with the same admin-only enable/refresh behavior. Use existing authorization-based accessState checks to keep this admin-only. Verify the component's usage instructions before implementing (authorization, invite-links)."
+          "description": "Update the Release Phone Ownership dialog flow to maintain usability on failure: keep the dialog open, avoid rendering any mutation error object directly in JSX, and (optionally) show an inline, plain-English error string derived from the same safe error-message helper used by the mutation. Ensure any displayed error is always a string and cleared on dialog open/field edits."
         },
         {
-          "path": "frontend/src/pages/AdminInviteManagementPage.tsx",
-          "operation": "modify",
-          "description": "Switch the page data source from useGetInviteCodes() to the new per-code status hook, and update row rendering to derive the \"Used\" vs \"Unused\" badge from the returned status fields. Ensure types align with InviteCodeWithStatus (optional usedAt/usedBy, deactivated) and keep the table stable with no TypeScript errors. Verify the component's usage instructions before implementing (authorization, invite-links)."
+          "path": "frontend/src/utils/releaseOwnershipErrors.ts",
+          "operation": "create",
+          "description": "Add a small utility that safely converts unknown/structured thrown values into a plain-English string for the release ownership UI (never returns raw JSON/code; handles non-Error throws; avoids '[object Object]'). Provide a dedicated function for the UI to display/toast release errors safely."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "After invite redemption in InviteGate, invalidate/refetch admin invite list queries so invite usage status updates without a hard reload, while keeping existing accessState/profile invalidations.",
+      "id": "REQ-2",
+      "summary": "Harden useReleasePhone error handling to extract readable messages from IC agent errors and map known traps to consistent English UI messages while preserving success behavior and query invalidation.",
       "acceptanceCriteria": [
-        "After redeeming an invite code, any active React Query cache for the admin invite list can be refreshed to show the updated status without a full-page reload.",
-        "Existing behavior remains: InviteGate still invalidates accessState and currentUserProfile after redemption."
+        "`useReleasePhone` converts unknown/structured thrown values into a safe string message (no `[object Object]`, no dumped JSON).",
+        "Known errors are mapped to consistent English text: invalid PIN, PIN not set, unauthorized owner, and IMEI not found.",
+        "On success, the success toast remains in English and the user phones list refreshes (React Query invalidation still works)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/InviteGate.tsx",
-          "operation": "modify",
-          "description": "After a successful redeemInviteCode call, keep invalidation of accessState and currentUserProfile, and additionally invalidate any admin invite list query keys used by Admin Invite Management (e.g., inviteCodesWithStatus and legacy inviteCodes) so an admin can see updated \"Used\" status without a full hard reload. Verify the component's usage instructions before implementing (authorization, invite-links)."
-        },
-        {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure the admin invite list query key(s) are well-defined and consistently used (including any new per-code status hook) so InviteGate can reliably invalidate them post-redemption. Verify the component's usage instructions before implementing (authorization, invite-links)."
+          "description": "Refactor `useReleasePhone` to treat `onError` as `unknown`, use the new `releaseOwnershipErrors` utility to extract/map a safe English message, and pass only strings to `toast.error` (never error objects). Add mapping for IMEI/phone-not-found cases and keep existing React Query invalidation + English success toast on success."
+        },
+        {
+          "path": "frontend/src/utils/releaseOwnershipErrors.ts",
+          "operation": "modify",
+          "description": "Implement/extend error parsing for Internet Computer agent-style errors (e.g., reject message fields, nested error objects, unknown thrown values) and map known backend trap strings (Invalid PIN, PIN not set, Unauthorized, IMEI/phone not found) to consistent English UI messages. Ensure the returned value is always a short, user-friendly string (no JSON dumping)."
         }
       ]
     }

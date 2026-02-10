@@ -128,19 +128,17 @@ export interface _SERVICE {
   'markNotificationAsRead' : ActorMethod<[bigint], undefined>,
   'redeemInviteCode' : ActorMethod<[string], undefined>,
   'registerProfile' : ActorMethod<[string, string], undefined>,
-  'releasePhoneFinal' : ActorMethod<[bigint], undefined>,
+  'releasePhone' : ActorMethod<[string, string], undefined>,
   'reportFound' : ActorMethod<[string, [] | [string]], undefined>,
   'reportLostStolen' : ActorMethod<
     [string, string, string, boolean],
     undefined
   >,
-  'requestPhoneRelease' : ActorMethod<[string, string, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setOrChangePin' : ActorMethod<[string], undefined>,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
   'transferOwnership' : ActorMethod<[string, Principal], undefined>,
   'validatePin' : ActorMethod<[string], undefined>,
-  'verifyReleaseRequest' : ActorMethod<[bigint], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -120,7 +120,7 @@
     "adminOnly": "Only admins can generate invite codes",
     "phoneRegistered": "Phone registered successfully",
     "phoneRegisterFailed": "Failed to register phone",
-    "releaseSubmitted": "Ownership release request submitted successfully. An admin will review your request.",
+    "releaseSubmitted": "Phone ownership released successfully",
     "releaseFailed": "Failed to release ownership",
     "invalidPin": "Invalid PIN. Please enter the correct 4-digit PIN.",
     "pinRequired": "You must set a 4-digit PIN before you can release a phone. Please set your PIN in Profile settings.",

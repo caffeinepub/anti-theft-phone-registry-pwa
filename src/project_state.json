@@ -1,49 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Aplikasi \"pencurian ponsel\" memiliki modul Admin Invite (invite link) yang statusnya seharusnya berubah dari \"Unused\" ke \"Used\" setelah link dipakai; saat ini ada bug sehingga status tetap \"Unused\" meski token sudah diredeem.",
-  "architectural_notes": [
-    "Admin Invite membutuhkan pencatatan backend saat token di-redeem agar status invite link berubah dari \"Unused\" ke \"Used\"."
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [
-    "Bug: Admin invite link/token yang sudah digunakan tidak mengubah status di Admin dari \"Unused\" ke \"Used\"."
+    "Error occurs during \"pelepasan ponsel\" action; user reports an error with code shown (screenshot referenced)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-frontend-admin-invite-management-page-data-source-to-display-invite-status-based-on-the-backend-api-that-includes-per-code-usage-status-used-usedat-usedby-deactivated-and-ensure-the-ui-correctly-renders-used-vs-unused-for-invites-that-have-been-redeemed",
-      "title": "Update the frontend Admin Invite Management page data source to display invite status based on the backend API that includes per-code usage status (used/usedAt/usedBy/deactivated), and ensure the UI correctly renders \"Used\" vs \"Unused\" for invites that have been redeemed.",
+      "id": "feature-fix-the-release-phone-ownership-flow-so-that-if-releasing-a-phone-fails-the-ui-never-displays-raw-code-json-debug-output-it-must-show-a-clean-user-friendly-error-message-instead-and-keep-the-dialog-usable",
+      "title": "Fix the \"Release Phone Ownership\" flow so that if releasing a phone fails, the UI never displays raw code/JSON/debug output; it must show a clean, user-friendly error message instead and keep the dialog usable.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-harden-error-handling-for-the-release-ownership-mutation-so-it-safely-extracts-a-readable-message-from-internet-computer-agent-errors-reject-message-error-objects-unknown-thrown-values-and-maps-known-backend-trap-strings-e-g-invalid-pin-you-must-set-a-4-digit-pin-unauthorized-to-consistent-english-ui-messages",
+      "title": "Harden error handling for the release ownership mutation so it safely extracts a readable message from Internet Computer agent errors (reject message, error objects, unknown thrown values) and maps known backend trap strings (e.g., \"Invalid PIN\", \"You must set a 4-digit PIN...\", \"Unauthorized...\") to consistent English UI messages.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-after-a-successful-invite-redemption-in-the-invitegate-flow-ensure-the-frontend-invalidates-refetches-any-admin-invite-list-queries-as-needed-so-that-an-admin-viewing-the-invite-list-can-see-updated-usage-without-requiring-a-full-hard-reload-while-keeping-the-existing-accessstate-profile-invalidations",
-      "title": "After a successful invite redemption in the InviteGate flow, ensure the frontend invalidates/refetches any admin invite list queries as needed so that an admin viewing the invite list can see updated usage without requiring a full hard reload (while keeping the existing accessState/profile invalidations).",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Perbaiki bug: status Admin Invite tetap \"Unused\" walau invite link/token sudah digunakan (redeemed) dan seharusnya menjadi \"Used\".",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Fix backend invite redemption so that an invite code is reliably marked as used (used=true, usedAt set, usedBy set) when the recipient redeems it, and ensure the admin invite listing API reads from the same source of truth that is updated on redemption.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Fix Admin Invite status not updating from Unused to Used after redemption",
+  "new_feature_requests": [],
+  "projectName": "Fix crash/garbled output when releasing phone ownership",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

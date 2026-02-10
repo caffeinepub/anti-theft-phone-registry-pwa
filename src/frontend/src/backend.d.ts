@@ -135,14 +135,12 @@ export interface backendInterface {
     markNotificationAsRead(notificationId: bigint): Promise<void>;
     redeemInviteCode(inviteCode: string): Promise<void>;
     registerProfile(email: string, city: string): Promise<void>;
-    releasePhoneFinal(requestId: bigint): Promise<void>;
+    releasePhone(imei: string, pin: string): Promise<void>;
     reportFound(imei: string, finderInfo: string | null): Promise<void>;
     reportLostStolen(imei: string, location: string, details: string, isStolen: boolean): Promise<void>;
-    requestPhoneRelease(imei: string, reason: string, pin: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setOrChangePin(newPin: string): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
     transferOwnership(imei: string, newOwner: Principal): Promise<void>;
     validatePin(pin: string): Promise<void>;
-    verifyReleaseRequest(requestId: bigint): Promise<void>;
 }

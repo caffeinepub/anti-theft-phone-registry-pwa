@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useGetUserPhones, useAddPhone, useRequestPhoneRelease, useHasPin } from '../hooks/useQueries';
+import { useGetUserPhones, useAddPhone, useReleasePhone, useHasPin } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Smartphone, Plus, Loader2, Trash2, AlertTriangle, Lock, KeyRound } from 'lucide-react';
 import { PhoneStatus } from '../backend';
 import { useNavigate } from '@tanstack/react-router';
@@ -16,7 +15,7 @@ export default function MyPhonesPage() {
   const { data: phones = [], isLoading } = useGetUserPhones();
   const { data: hasPin, isLoading: checkingPin } = useHasPin();
   const addPhone = useAddPhone();
-  const requestRelease = useRequestPhoneRelease();
+  const releasePhone = useReleasePhone();
   const navigate = useNavigate();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -31,8 +30,8 @@ export default function MyPhonesPage() {
   // Release dialog state
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false);
   const [selectedPhone, setSelectedPhone] = useState<{ imei: string; brand: string; model: string } | null>(null);
-  const [releaseReason, setReleaseReason] = useState('');
   const [pin, setPin] = useState('');
+  const [confirmationInput, setConfirmationInput] = useState('');
 
   const handleOpenAddDialog = () => {
     setImei('');
@@ -96,34 +95,49 @@ export default function MyPhonesPage() {
     }
     
     setSelectedPhone(phone);
-    setReleaseReason('');
     setPin('');
+    setConfirmationInput('');
     setIsReleaseDialogOpen(true);
   };
 
   const handleRelease = () => {
-    if (!selectedPhone || !releaseReason || !pin) {
+    if (!selectedPhone || !pin || !confirmationInput) {
       return;
     }
 
-    requestRelease.mutate(
+    // Verify confirmation input matches last 4 digits of IMEI
+    const last4Digits = selectedPhone.imei.slice(-4);
+    if (confirmationInput !== last4Digits) {
+      return;
+    }
+
+    releasePhone.mutate(
       { 
         imei: selectedPhone.imei, 
-        reason: releaseReason,
         pin: pin
       },
       {
         onSuccess: () => {
+          // Close dialog and reset state on success
           setIsReleaseDialogOpen(false);
           setSelectedPhone(null);
-          setReleaseReason('');
           setPin('');
+          setConfirmationInput('');
         },
+        // Note: onError is handled by the mutation hook with toast
+        // Dialog stays open on error so user can correct and retry
       }
     );
   };
 
-  const isReleaseFormValid = releaseReason && pin && pin.length === 4;
+  const isReleaseFormValid = () => {
+    if (!selectedPhone || !pin || pin.length !== 4 || !confirmationInput) {
+      return false;
+    }
+    const last4Digits = selectedPhone.imei.slice(-4);
+    return confirmationInput === last4Digits;
+  };
+
   const isRegistrationFormValid = imei.length >= 15 && brand && model && registrationPin.length === 4;
 
   const getStatusBadge = (status: PhoneStatus) => {
@@ -263,17 +277,17 @@ export default function MyPhonesPage() {
             <DialogHeader>
               <DialogTitle>Release Phone Ownership</DialogTitle>
               <DialogDescription>
-                Enter your 4-digit security PIN and provide a reason to release ownership of this phone.
+                This action will immediately remove this phone from your account. Enter your PIN and confirm to proceed.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
+              <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
-                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <p className="font-semibold">Important Security Notice</p>
+                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-red-800 dark:text-red-200">
+                    <p className="font-semibold">Warning: Immediate Release</p>
                     <p className="mt-1">
-                      Releasing ownership will remove this phone from your account. This action requires admin approval and your security PIN.
+                      Once you confirm, this phone will be immediately removed from your account. This action cannot be undone. Anyone can register this IMEI after release.
                     </p>
                   </div>
                 </div>
@@ -290,18 +304,24 @@ export default function MyPhonesPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="reason">Reason for Release (Required)</Label>
-                <Select value={releaseReason} onValueChange={setReleaseReason}>
-                  <SelectTrigger id="reason">
-                    <SelectValue placeholder="Select a reason" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Sold to someone">Sold to someone</SelectItem>
-                    <SelectItem value="Given to family/friend">Given to family/friend</SelectItem>
-                    <SelectItem value="Upgrading to new phone">Upgrading to new phone</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="confirmationInput" className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                  Confirmation (Required)
+                </Label>
+                <Input
+                  id="confirmationInput"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={selectedPhone ? `Type last 4 digits: ${selectedPhone.imei.slice(-4)}` : 'Type last 4 digits of IMEI'}
+                  value={confirmationInput}
+                  onChange={(e) => setConfirmationInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  maxLength={4}
+                  className="font-mono text-center text-lg tracking-widest"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Type the last 4 digits of the IMEI to confirm
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -329,22 +349,22 @@ export default function MyPhonesPage() {
               <Button
                 variant="outline"
                 onClick={() => setIsReleaseDialogOpen(false)}
-                disabled={requestRelease.isPending}
+                disabled={releasePhone.isPending}
               >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleRelease}
-                disabled={!isReleaseFormValid || requestRelease.isPending}
+                disabled={!isReleaseFormValid() || releasePhone.isPending}
               >
-                {requestRelease.isPending ? (
+                {releasePhone.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    Releasing...
                   </>
                 ) : (
-                  'Confirm Release'
+                  'Release Ownership'
                 )}
               </Button>
             </DialogFooter>

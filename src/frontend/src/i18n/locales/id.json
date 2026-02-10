@@ -120,7 +120,7 @@
     "adminOnly": "Hanya admin yang dapat membuat kode undangan",
     "phoneRegistered": "Ponsel berhasil didaftarkan",
     "phoneRegisterFailed": "Gagal mendaftarkan ponsel",
-    "releaseSubmitted": "Permintaan pelepasan kepemilikan berhasil diajukan. Admin akan meninjau permintaan Anda.",
+    "releaseSubmitted": "Kepemilikan ponsel berhasil dilepaskan",
     "releaseFailed": "Gagal melepaskan kepemilikan",
     "invalidPin": "PIN tidak valid. Silakan masukkan PIN 4 digit yang benar.",
     "pinRequired": "Anda harus mengatur PIN 4 digit sebelum dapat melepaskan ponsel. Silakan atur PIN Anda di pengaturan Profil.",

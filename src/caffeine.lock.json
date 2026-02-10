@@ -13,7 +13,7 @@
     "invite-links": "3.0.0"
   },
   "tags": [],
-  "aiCoreVersion": "0.19.5",
+  "aiCoreVersion": "0.19.6",
   "motokoVersion": "1.0.0-beta",
   "coreLibVersion": "implicits-20"
 }

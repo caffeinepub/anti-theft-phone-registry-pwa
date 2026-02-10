@@ -1,35 +1,43 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T14:41:33.469Z",
-  "summary": "Frontend changes implement invite-status-aware admin listing (via a new/updated `useGetInviteCodesWithStatus` hook and updated Admin Invite Management UI) and add React Query invalidations after invite redemption. Backend changes show introduction of an `InviteCodeWithStatus` record and an `invitesWithStatus` map, but the diff excerpt is truncated before any evidence of `redeemInviteCode` actually persisting used/usedAt/usedBy or the admin listing API reading from the same updated source of truth.",
+  "generatedAt": "2026-02-10T21:16:28.675Z",
+  "summary": "The diff adds a dedicated frontend utility to safely extract and map release-ownership errors into user-friendly English strings, and wires it into the React Query hooks file (useQueries.ts). MyPhonesPage changes appear to support a release dialog that remains open/usable on error, but the relevant onError/onSuccess handling for the release mutation is not visible in the provided truncation, so full compliance with the success/refresh and no-raw-output acceptance criteria cannot be conclusively verified from the diff excerpt.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Fix backend invite redemption so that an invite code is reliably marked as used (used=true, usedAt set, usedBy set) when redeemed, and ensure the admin invite listing API reads from the same source of truth that is updated on redemption.",
-      "reason": "The provided backend diff excerpt only shows new types/storage (`InviteCodeWithStatus`, `invitesWithStatus`) but does not include any visible changes to `redeemInviteCode` or the admin invite listing/query method(s) that would prove used/usedAt/usedBy are set on redemption and later returned to admins from the same storage. Because the file is truncated, this cannot be confirmed from the evidence shown.",
+      "id": "REQ-2",
+      "requirement": "On success, the success toast remains in English and the user phones list refreshes (React Query invalidation still works).",
+      "reason": "The diff shows a new error-extraction utility and an import in useQueries.ts, but the actual implementation of useReleasePhone (including success toast text and query invalidation for the phones list) is not present in the visible/truncated excerpt, so this acceptance criterion cannot be confirmed from the provided evidence.",
       "evidence": [
-        "backend/main.mo (truncated: shows `type InviteCodeWithStatus` and `let invitesWithStatus = Map.empty<Text, InviteCodeWithStatus>();` but no redemption/listing logic visible)"
+        "frontend/src/hooks/useQueries.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "When the release action fails, the app shows an error toast/message in plain English and does not render any raw JSON or code-like output on screen; the release dialog remains interactive after an error.",
+      "reason": "While the new extractReleaseErrorMessage utility is designed to prevent raw/structured errors from leaking into UI, the diff excerpt does not show the release dialog’s error rendering/toast invocation path (e.g., the onError handler in useReleasePhone or the dialog UI code path) due to truncation, so end-to-end behavior cannot be fully verified from the provided snippet alone.",
+      "evidence": [
+        "frontend/src/utils/releaseOwnershipErrors.ts",
+        "frontend/src/pages/MyPhonesPage.tsx (truncated)",
+        "frontend/src/hooks/useQueries.ts (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "PIN management functionality (set/change/validate/clear PIN) and related React Query hooks were added/modified, which is not part of the invite-status bugfix request.",
-      "reason": "BuildRequest focuses on invite redemption status tracking and admin invite list updates; it does not request any PIN feature work.",
+      "description": "Adds a user-facing mapped message for an 'already released/no longer registered' backend error case.",
+      "reason": "The BuildRequest only specified mapping for invalid PIN, PIN not set, unauthorized owner, and IMEI not found. Handling an additional 'already released' scenario is not requested.",
       "evidence": [
-        "backend/main.mo (truncated: `// PIN Management` section with `setOrChangePin`, `validatePin`, `clearPin`, `hasPin`)",
-        "frontend/src/hooks/useQueries.ts (truncated: `useHasPin`, `useSetOrChangePin` and PIN-related invalidations/toasts)"
+        "frontend/src/utils/releaseOwnershipErrors.ts"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/InviteGate.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminInviteManagementPage.tsx",
+    "frontend/src/pages/MyPhonesPage.tsx",
+    "frontend/src/utils/releaseOwnershipErrors.ts",
     "project_state.json"
   ]
 }

@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the admin invite status so redeemed invite codes reliably change from “Unused” to “Used” (including usage metadata) and the UI reflects the updated status without requiring a hard reload.
+**Goal:** Prevent the “Release Phone Ownership” flow from crashing or showing raw JSON/code when an error occurs, and instead display clean, user-friendly English error messaging while keeping the dialog usable.
 
 **Planned changes:**
-- Fix backend invite redemption to consistently mark the invite as used (`used=true`) and set `usedAt` and `usedBy` when `redeemInviteCode` succeeds, ensuring admin listing reads from the same updated source of truth.
-- Update Admin Invite Management page to use the backend API fields that include per-invite usage status (`used/usedAt/usedBy/deactivated`) and render “Used” vs “Unused” correctly.
-- After successful redemption in the InviteGate flow, invalidate/refetch the admin invite list React Query cache so an admin sees updated invite usage without a full page reload (keeping existing accessState/currentUserProfile invalidations).
+- Update the release ownership UI to never render raw error objects/JSON/debug output; show a plain-English error message (e.g., toast/inline) instead.
+- Harden the `useReleasePhone` error handling to safely convert any thrown/structured values into a readable string (no React runtime errors from rendering objects/arrays/bigints).
+- Map known backend/agent error/trap strings to consistent English messages (invalid PIN, PIN not set, unauthorized owner, IMEI not found) while preserving the existing success behavior (English success toast + phones list refresh via query invalidation).
 
-**User-visible outcome:** When an invite link/code is redeemed, admins will see the invite status switch to “Used” (with usage details) on the Admin Invite Management page after refresh/auto-refresh or query refetch, without needing a hard reload.
+**User-visible outcome:** If releasing phone ownership fails, the user sees a clear English error message and can correct inputs and retry or cancel—without any raw JSON/code appearing and without the dialog breaking.

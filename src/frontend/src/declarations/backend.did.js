@@ -150,20 +150,18 @@ export const idlService = IDL.Service({
   'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
   'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
   'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
-  'releasePhoneFinal' : IDL.Func([IDL.Nat], [], []),
+  'releasePhone' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'reportFound' : IDL.Func([IDL.Text, IDL.Opt(IDL.Text)], [], []),
   'reportLostStolen' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
       [],
       [],
     ),
-  'requestPhoneRelease' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setOrChangePin' : IDL.Func([IDL.Text], [], []),
   'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
   'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal], [], []),
   'validatePin' : IDL.Func([IDL.Text], [], []),
-  'verifyReleaseRequest' : IDL.Func([IDL.Nat], [], []),
 });
 
 export const idlInitArgs = [];
@@ -308,20 +306,18 @@ export const idlFactory = ({ IDL }) => {
     'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
     'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
     'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
-    'releasePhoneFinal' : IDL.Func([IDL.Nat], [], []),
+    'releasePhone' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'reportFound' : IDL.Func([IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'reportLostStolen' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
         [],
         [],
       ),
-    'requestPhoneRelease' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setOrChangePin' : IDL.Func([IDL.Text], [], []),
     'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
     'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal], [], []),
     'validatePin' : IDL.Func([IDL.Text], [], []),
-    'verifyReleaseRequest' : IDL.Func([IDL.Nat], [], []),
   });
 };
 

@@ -15,6 +15,8 @@ import Statistics "lib/Statistics";
 import Random "mo:core/Random";
 import InviteLinksModule "invite-links/invite-links-module";
 
+
+
 actor {
   type PhoneStatus = { #active; #lost; #stolen };
   public type Notification = Notification.Notification;
@@ -426,15 +428,28 @@ actor {
       pins.add(caller, pin);
     };
 
-    let phone : Phone = {
-      imei;
-      brand;
-      model;
-      owner = caller;
-      status = #active;
+    // Check if IMEI is already registered and active
+    switch (phones.get(imei)) {
+      case (?existingPhone) {
+        if (existingPhone.owner != caller) {
+          Runtime.trap("The HP (IMEI " # imei # ") is already registered to a different owner. Please request a release from the current owner.");
+        } else {
+          Runtime.trap("This HP is already registered to your account");
+        };
+      };
+      case (null) {
+        // IMEI not found or previously released, proceed with registration
+        let phone : Phone = {
+          imei;
+          brand;
+          model;
+          owner = caller;
+          status = #active;
+        };
+        phones.add(imei, phone);
+        _sendNotification(caller, "HP berhasil didaftarkan", "HP dengan IMEI " # imei # " berhasil ditambahkan ke akun Anda. Pengingat: Mohon jaga HP Anda dengan baik.", #success, null);
+      };
     };
-    phones.add(imei, phone);
-    _sendNotification(caller, "HP berhasil didaftarkan", "HP dengan IMEI " # imei # " berhasil ditambahkan ke akun Anda. Pengingat: Mohon jaga HP Anda dengan baik.", #success, null);
   };
 
   public shared ({ caller }) func transferOwnership(imei : Text, newOwner : Principal) : async () {
@@ -475,7 +490,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func requestPhoneRelease(imei : Text, reason : Text, pin : Text) : async () {
+  public shared ({ caller }) func releasePhone(imei : Text, pin : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be logged in to release phone");
     };
@@ -496,29 +511,16 @@ actor {
     switch (phones.get(imei)) {
       case (?phone) {
         if (phone.owner != caller) {
-          Runtime.trap("Unauthorized: Only the owner can request a phone release");
+          Runtime.trap("Unauthorized: Only the owner can release this phone");
         };
-        let newRequest : ReleaseRequest = {
-          id = nextReleaseRequestId;
-          owner = caller;
-          imei;
-          reason;
-          verified = false;
-          timestamp = Time.now();
-        };
-
-        var currentRequests : List.List<ReleaseRequest> = switch (releaseRequests.get(caller)) {
-          case (null) {
-            List.empty<ReleaseRequest>();
-          };
-          case (?requests) {
-            requests;
-          };
-        };
-
-        currentRequests.add(newRequest);
-        releaseRequests.add(caller, currentRequests);
-        nextReleaseRequestId += 1;
+        phones.remove(imei);
+        _sendNotification(
+          caller,
+          "HP berhasil dirilis",
+          "HP dengan IMEI " # imei # " berhasil dirilis dari akun Anda. Anda dapat mendaftarkan HP baru sekarang.",
+          #success,
+          null,
+        );
       };
       case (null) {
         Runtime.trap("HP not found. Please check the IMEI.");
@@ -526,82 +528,9 @@ actor {
     };
   };
 
-  public shared ({ caller }) func verifyReleaseRequest(requestId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can verify phone release requests");
-    };
-    var found = false;
-    for ((owner, requests) in releaseRequests.entries()) {
-      let updatedRequests = requests.map<ReleaseRequest, ReleaseRequest>(
-        func(req) {
-          if (req.id == requestId) {
-            found := true;
-            { req with verified = true };
-          } else { req };
-        }
-      );
-      releaseRequests.add(owner, updatedRequests);
-    };
-
-    if (not found) {
-      Runtime.trap("Release request not found");
-    };
-  };
-
-  public shared ({ caller }) func releasePhoneFinal(requestId : Nat) : async () {
-    var foundRequest : ?ReleaseRequest = null;
-    for ((_, requests) in releaseRequests.entries()) {
-      for (req in requests.values()) {
-        if (req.id == requestId) {
-          foundRequest := ?req;
-        };
-      };
-    };
-
-    switch (foundRequest) {
-      case (?request) {
-        // Authorization: Only the request owner or an admin can finalize
-        if (caller != request.owner and not AccessControl.isAdmin(accessControlState, caller)) {
-          Runtime.trap("Unauthorized: Only the owner or an admin can finalize phone release");
-        };
-
-        if (not request.verified) {
-          Runtime.trap("Release request not verified");
-        };
-
-        switch (phones.get(request.imei)) {
-          case (?phone) {
-            if (phone.owner != request.owner) {
-              Runtime.trap("Unauthorized: Only the owner can finalize phone release");
-            };
-            phones.remove(request.imei);
-          };
-          case (null) {
-            Runtime.trap("HP not found. Please check the IMEI.");
-          };
-        };
-
-        let updatedRequests : List.List<ReleaseRequest> = switch (releaseRequests.get(request.owner)) {
-          case (null) { List.empty<ReleaseRequest>() };
-          case (?requests) {
-            requests.filter(
-              func(req) {
-                req.id != requestId;
-              }
-            );
-          };
-        };
-        releaseRequests.add(request.owner, updatedRequests);
-      };
-      case (null) {
-        Runtime.trap("Release request not found");
-      };
-    };
-  };
-
-  //------------------------------
+  //--------------------------------
   // Phone Reporting
-  //------------------------------
+  //--------------------------------
 
   public shared ({ caller }) func reportLostStolen(imei : Text, location : Text, details : Text, isStolen : Bool) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
