@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCallerUserProfile, useHasPin } from '../hooks/useQueries';
+import { useGetCallerUserProfile, useHasPin, useHasUserAccess } from '../hooks/useQueries';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, MapPin, LogOut, Shield, Lock, KeyRound } from 'lucide-react';
+import { User, Mail, MapPin, LogOut, Shield, Lock, KeyRound, CheckCircle, XCircle } from 'lucide-react';
 import PinSettingsDialog from '../components/PinSettingsDialog';
 
 export default function ProfilePage() {
   const { clear, identity } = useInternetIdentity();
   const { data: userProfile } = useGetCallerUserProfile();
   const { data: hasPin, isLoading: checkingPin } = useHasPin();
+  const { data: isActivated, isLoading: checkingActivation } = useHasUserAccess();
   const queryClient = useQueryClient();
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
 
@@ -37,6 +38,34 @@ export default function ProfilePage() {
 
       {/* Content */}
       <div className="mx-auto max-w-4xl px-4 py-6">
+        {/* Account Status Card */}
+        <Card className={`mb-6 ${isActivated ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950' : 'border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950'}`}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isActivated ? (
+                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                ) : (
+                  <XCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                )}
+                <div>
+                  <p className={`font-semibold ${isActivated ? 'text-green-900 dark:text-green-100' : 'text-yellow-900 dark:text-yellow-100'}`}>
+                    {checkingActivation ? 'Checking status...' : isActivated ? 'Account Activated' : 'Account Not Activated'}
+                  </p>
+                  <p className={`text-sm ${isActivated ? 'text-green-800 dark:text-green-200' : 'text-yellow-800 dark:text-yellow-200'}`}>
+                    {isActivated 
+                      ? 'You can register phones and use all features' 
+                      : 'Contact admin to activate your account'}
+                  </p>
+                </div>
+              </div>
+              <Badge className={isActivated ? 'bg-green-600' : 'bg-yellow-600'}>
+                {isActivated ? 'Activated' : 'Inactive'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Profile Card */}
         <Card className="mb-6 shadow-lg">
           <CardHeader>
@@ -116,26 +145,6 @@ export default function ProfilePage() {
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Account Status */}
-        <Card className="mb-6 border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <div>
-                  <p className="font-semibold text-green-900 dark:text-green-100">
-                    Akun Terverifikasi
-                  </p>
-                  <p className="text-sm text-green-800 dark:text-green-200">
-                    Akun Anda terlindungi dengan Internet Identity
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-green-600">Aktif</Badge>
-            </div>
           </CardContent>
         </Card>
 

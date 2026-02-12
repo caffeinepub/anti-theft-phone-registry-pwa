@@ -1,51 +1,32 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T21:16:28.678Z",
+  "generatedAt": "2026-02-12T19:45:07.740Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
-    "items": [
-      {
-        "id": "REQ-1",
-        "summary": "Fix the \"Release Phone Ownership\" flow so that if releasing a phone fails, the UI never displays raw code/JSON/debug output; it must show a clean, user-friendly error message instead and keep the dialog usable.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/MyPhonesPage.tsx",
-          "frontend/src/utils/releaseOwnershipErrors.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/MyPhonesPage.tsx",
-          "frontend/src/utils/releaseOwnershipErrors.ts"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Harden error handling for the release ownership mutation so it safely extracts a readable message from Internet Computer agent errors (reject message, error objects, unknown thrown values) and maps known backend trap strings (e.g., \"Invalid PIN\", \"You must set a 4-digit PIN...\", \"Unauthorized...\") to consistent English UI messages.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/utils/releaseOwnershipErrors.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/utils/releaseOwnershipErrors.ts"
-        ]
-      }
-    ]
+    "total": 0,
+    "implemented": 0,
+    "items": []
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/ActivationPendingScreen.tsx",
+    "frontend/src/components/InviteGate.tsx",
+    "frontend/src/components/MainLayout.tsx",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminInviteManagementPage.tsx",
+    "frontend/src/pages/AdminUserActivationPage.tsx",
     "frontend/src/pages/MyPhonesPage.tsx",
-    "frontend/src/utils/releaseOwnershipErrors.ts",
+    "frontend/src/pages/NotificationsPage.tsx",
+    "frontend/src/pages/ProfilePage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

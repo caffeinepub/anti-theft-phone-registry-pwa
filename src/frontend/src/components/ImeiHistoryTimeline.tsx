@@ -22,9 +22,7 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case EventTypeEnum.ownershipTransferred:
         return <UserCheck className="h-5 w-5 text-purple-600" />;
-      case EventTypeEnum.ownershipReleaseRequested:
-        return <FileText className="h-5 w-5 text-yellow-600" />;
-      case EventTypeEnum.ownershipRevoked:
+      case EventTypeEnum.ownershipReleased:
         return <Trash2 className="h-5 w-5 text-gray-600" />;
       case EventTypeEnum.reRegistered:
         return <RefreshCw className="h-5 w-5 text-indigo-600" />;
@@ -45,10 +43,8 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
         return 'Reported Found';
       case EventTypeEnum.ownershipTransferred:
         return 'Ownership Transferred';
-      case EventTypeEnum.ownershipReleaseRequested:
-        return 'Release Requested';
-      case EventTypeEnum.ownershipRevoked:
-        return 'Ownership Revoked';
+      case EventTypeEnum.ownershipReleased:
+        return 'Ownership Released';
       case EventTypeEnum.reRegistered:
         return 'Re-registered';
       default:
@@ -63,7 +59,7 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
       case EventTypeEnum.reRegistered:
         return 'default';
       case EventTypeEnum.lostReported:
-      case EventTypeEnum.ownershipReleaseRequested:
+      case EventTypeEnum.ownershipReleased:
         return 'secondary';
       case EventTypeEnum.stolenReported:
         return 'destructive';
@@ -83,10 +79,11 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
     });
   };
 
-  // Calculate hand-off count (ownership transfers and re-registrations)
+  // Calculate hand-off count (ownership transfers, releases, and re-registrations)
   const handOffCount = events.filter(
     (event) =>
       event.eventType === EventTypeEnum.ownershipTransferred ||
+      event.eventType === EventTypeEnum.ownershipReleased ||
       event.eventType === EventTypeEnum.reRegistered
   ).length;
 

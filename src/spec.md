@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Prevent the “Release Phone Ownership” flow from crashing or showing raw JSON/code when an error occurs, and instead display clean, user-friendly English error messaging while keeping the dialog usable.
+**Goal:** Update the application’s admin/invite and profile/vehicle-registration-access screens to match the latest UI/content shown in the provided screenshots.
 
 **Planned changes:**
-- Update the release ownership UI to never render raw error objects/JSON/debug output; show a plain-English error message (e.g., toast/inline) instead.
-- Harden the `useReleasePhone` error handling to safely convert any thrown/structured values into a readable string (no React runtime errors from rendering objects/arrays/bigints).
-- Map known backend/agent error/trap strings to consistent English messages (invalid PIN, PIN not set, unauthorized owner, IMEI not found) while preserving the existing success behavior (English success toast + phones list refresh via query invalidation).
+- Add/adjust an Admin section showing invite metrics (Total Invites, Unused, Used) and an “All Invites” table with code list, created date, status, used at/by, and copy action.
+- Add/adjust a Profile screen section for “Manage your vehicle registration access” with a status pill (e.g., Activated) and an activation message panel.
+- Add/adjust a Personal Information card with an Edit action and fields like Full Name, Email, City.
 
-**User-visible outcome:** If releasing phone ownership fails, the user sees a clear English error message and can correct inputs and retry or cancel—without any raw JSON/code appearing and without the dialog breaking.
+**User-visible outcome:** Users can view the updated Admin invites dashboard/table and see updated profile sections for vehicle registration access status and personal information as shown in the screenshots.

@@ -27,6 +27,19 @@ export interface Statistics {
     totalPhones: bigint;
     stolenPhones: bigint;
 }
+export type ReleaseOwnershipReason = {
+    __kind__: "other";
+    other: string;
+} | {
+    __kind__: "sold";
+    sold: null;
+} | {
+    __kind__: "givenToSomeone";
+    givenToSomeone: null;
+} | {
+    __kind__: "replacedWithNewPhone";
+    replacedWithNewPhone: null;
+};
 export interface Phone {
     status: PhoneStatus;
     model: string;
@@ -88,8 +101,7 @@ export enum EventType {
     reRegistered = "reRegistered",
     stolenReported = "stolenReported",
     lostReported = "lostReported",
-    ownershipRevoked = "ownershipRevoked",
-    ownershipReleaseRequested = "ownershipReleaseRequested",
+    ownershipReleased = "ownershipReleased",
     ownershipTransferred = "ownershipTransferred",
     foundReported = "foundReported",
     registered = "registered"
@@ -135,7 +147,7 @@ export interface backendInterface {
     markNotificationAsRead(notificationId: bigint): Promise<void>;
     redeemInviteCode(inviteCode: string): Promise<void>;
     registerProfile(email: string, city: string): Promise<void>;
-    releasePhone(imei: string, pin: string): Promise<void>;
+    releasePhone(imei: string, pin: string, reason: ReleaseOwnershipReason): Promise<void>;
     reportFound(imei: string, finderInfo: string | null): Promise<void>;
     reportLostStolen(imei: string, location: string, details: string, isStolen: boolean): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

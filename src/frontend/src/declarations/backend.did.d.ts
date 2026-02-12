@@ -18,8 +18,7 @@ export interface AccessState {
 export type EventType = { 'reRegistered' : null } |
   { 'stolenReported' : null } |
   { 'lostReported' : null } |
-  { 'ownershipRevoked' : null } |
-  { 'ownershipReleaseRequested' : null } |
+  { 'ownershipReleased' : null } |
   { 'ownershipTransferred' : null } |
   { 'foundReported' : null } |
   { 'registered' : null };
@@ -75,6 +74,10 @@ export interface RSVP {
   'timestamp' : Time,
   'attending' : boolean,
 }
+export type ReleaseOwnershipReason = { 'other' : string } |
+  { 'sold' : null } |
+  { 'givenToSomeone' : null } |
+  { 'replacedWithNewPhone' : null };
 export interface Statistics {
   'lostPhones' : bigint,
   'activePhones' : bigint,
@@ -128,7 +131,10 @@ export interface _SERVICE {
   'markNotificationAsRead' : ActorMethod<[bigint], undefined>,
   'redeemInviteCode' : ActorMethod<[string], undefined>,
   'registerProfile' : ActorMethod<[string, string], undefined>,
-  'releasePhone' : ActorMethod<[string, string], undefined>,
+  'releasePhone' : ActorMethod<
+    [string, string, ReleaseOwnershipReason],
+    undefined
+  >,
   'reportFound' : ActorMethod<[string, [] | [string]], undefined>,
   'reportLostStolen' : ActorMethod<
     [string, string, string, boolean],

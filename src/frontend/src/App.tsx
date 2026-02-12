@@ -1,17 +1,17 @@
 import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { useGetCallerUserProfile, useGetAccessState } from './hooks/useQueries';
+import { useGetCallerUserProfile, useHasUserAccess } from './hooks/useQueries';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
 import LoginPage from './pages/LoginPage';
 import ProfileSetupModal from './components/ProfileSetupModal';
-import InviteGate from './components/InviteGate';
+import ActivationPendingScreen from './components/ActivationPendingScreen';
 import MainLayout from './components/MainLayout';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from './i18n/useTranslation';
 
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
-  const { data: accessState, isLoading: accessLoading } = useGetAccessState();
+  const { data: hasAccess, isLoading: accessLoading } = useHasUserAccess();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   const { t } = useTranslation();
 
@@ -47,18 +47,18 @@ export default function App() {
     );
   }
 
-  // Show invite gate if user requires invite
-  if (accessState?.requiresInvite) {
+  // Show activation pending screen if user is not activated
+  if (hasAccess === false) {
     return (
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <InviteGate />
+        <ActivationPendingScreen />
         <Toaster />
       </ThemeProvider>
     );
   }
 
-  // Show profile setup modal if user is authenticated and has access but has no profile
-  const showProfileSetup = isAuthenticated && accessState?.isUser && !profileLoading && isFetched && userProfile === null;
+  // Show profile setup modal if user is authenticated and activated but has no profile
+  const showProfileSetup = isAuthenticated && hasAccess && !profileLoading && isFetched && userProfile === null;
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>

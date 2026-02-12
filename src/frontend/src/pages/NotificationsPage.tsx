@@ -1,4 +1,5 @@
 import { useGetNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,8 @@ import { id } from 'date-fns/locale';
 import { NotificationType } from '../backend';
 
 export default function NotificationsPage() {
-  const { data: notifications = [], isLoading } = useGetNotifications();
+  const { identity } = useInternetIdentity();
+  const { data: notifications = [], isLoading } = useGetNotifications(identity?.getPrincipal());
   const markAsRead = useMarkNotificationAsRead();
   const markAllAsRead = useMarkAllNotificationsAsRead();
 

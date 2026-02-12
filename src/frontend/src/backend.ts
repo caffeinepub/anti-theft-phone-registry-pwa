@@ -109,6 +109,19 @@ export interface Statistics {
     totalPhones: bigint;
     stolenPhones: bigint;
 }
+export type ReleaseOwnershipReason = {
+    __kind__: "other";
+    other: string;
+} | {
+    __kind__: "sold";
+    sold: null;
+} | {
+    __kind__: "givenToSomeone";
+    givenToSomeone: null;
+} | {
+    __kind__: "replacedWithNewPhone";
+    replacedWithNewPhone: null;
+};
 export interface Phone {
     status: PhoneStatus;
     model: string;
@@ -170,8 +183,7 @@ export enum EventType {
     reRegistered = "reRegistered",
     stolenReported = "stolenReported",
     lostReported = "lostReported",
-    ownershipRevoked = "ownershipRevoked",
-    ownershipReleaseRequested = "ownershipReleaseRequested",
+    ownershipReleased = "ownershipReleased",
     ownershipTransferred = "ownershipTransferred",
     foundReported = "foundReported",
     registered = "registered"
@@ -218,7 +230,7 @@ export interface backendInterface {
     markNotificationAsRead(notificationId: bigint): Promise<void>;
     redeemInviteCode(inviteCode: string): Promise<void>;
     registerProfile(email: string, city: string): Promise<void>;
-    releasePhone(imei: string, pin: string): Promise<void>;
+    releasePhone(imei: string, pin: string, reason: ReleaseOwnershipReason): Promise<void>;
     reportFound(imei: string, finderInfo: string | null): Promise<void>;
     reportLostStolen(imei: string, location: string, details: string, isStolen: boolean): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
@@ -227,7 +239,7 @@ export interface backendInterface {
     transferOwnership(imei: string, newOwner: Principal): Promise<void>;
     validatePin(pin: string): Promise<void>;
 }
-import type { EventType as _EventType, IMEIEvent as _IMEIEvent, InviteCodeWithStatus as _InviteCodeWithStatus, Notification as _Notification, NotificationType as _NotificationType, Phone as _Phone, PhoneStatus as _PhoneStatus, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { EventType as _EventType, IMEIEvent as _IMEIEvent, InviteCodeWithStatus as _InviteCodeWithStatus, Notification as _Notification, NotificationType as _NotificationType, Phone as _Phone, PhoneStatus as _PhoneStatus, ReleaseOwnershipReason as _ReleaseOwnershipReason, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -594,31 +606,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async releasePhone(arg0: string, arg1: string): Promise<void> {
+    async releasePhone(arg0: string, arg1: string, arg2: ReleaseOwnershipReason): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.releasePhone(arg0, arg1);
+                const result = await this.actor.releasePhone(arg0, arg1, to_candid_ReleaseOwnershipReason_n28(this._uploadFile, this._downloadFile, arg2));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.releasePhone(arg0, arg1);
+            const result = await this.actor.releasePhone(arg0, arg1, to_candid_ReleaseOwnershipReason_n28(this._uploadFile, this._downloadFile, arg2));
             return result;
         }
     }
     async reportFound(arg0: string, arg1: string | null): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.reportFound(arg0, to_candid_opt_n28(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.reportFound(arg0, to_candid_opt_n30(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.reportFound(arg0, to_candid_opt_n28(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.reportFound(arg0, to_candid_opt_n30(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -846,9 +858,7 @@ function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     lostReported: null;
 } | {
-    ownershipRevoked: null;
-} | {
-    ownershipReleaseRequested: null;
+    ownershipReleased: null;
 } | {
     ownershipTransferred: null;
 } | {
@@ -856,7 +866,7 @@ function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     registered: null;
 }): EventType {
-    return "reRegistered" in value ? EventType.reRegistered : "stolenReported" in value ? EventType.stolenReported : "lostReported" in value ? EventType.lostReported : "ownershipRevoked" in value ? EventType.ownershipRevoked : "ownershipReleaseRequested" in value ? EventType.ownershipReleaseRequested : "ownershipTransferred" in value ? EventType.ownershipTransferred : "foundReported" in value ? EventType.foundReported : "registered" in value ? EventType.registered : value;
+    return "reRegistered" in value ? EventType.reRegistered : "stolenReported" in value ? EventType.stolenReported : "lostReported" in value ? EventType.lostReported : "ownershipReleased" in value ? EventType.ownershipReleased : "ownershipTransferred" in value ? EventType.ownershipTransferred : "foundReported" in value ? EventType.foundReported : "registered" in value ? EventType.registered : value;
 }
 function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     warning: null;
@@ -897,10 +907,13 @@ function from_candid_vec_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function from_candid_vec_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_IMEIEvent>): Array<IMEIEvent> {
     return value.map((x)=>from_candid_IMEIEvent_n10(_uploadFile, _downloadFile, x));
 }
+function to_candid_ReleaseOwnershipReason_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ReleaseOwnershipReason): _ReleaseOwnershipReason {
+    return to_candid_variant_n29(_uploadFile, _downloadFile, value);
+}
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_opt_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
+function to_candid_opt_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
     return value === null ? candid_none() : candid_some(value);
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
@@ -916,6 +929,37 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         user: null
     } : value == UserRole.guest ? {
         guest: null
+    } : value;
+}
+function to_candid_variant_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    __kind__: "other";
+    other: string;
+} | {
+    __kind__: "sold";
+    sold: null;
+} | {
+    __kind__: "givenToSomeone";
+    givenToSomeone: null;
+} | {
+    __kind__: "replacedWithNewPhone";
+    replacedWithNewPhone: null;
+}): {
+    other: string;
+} | {
+    sold: null;
+} | {
+    givenToSomeone: null;
+} | {
+    replacedWithNewPhone: null;
+} {
+    return value.__kind__ === "other" ? {
+        other: value.other
+    } : value.__kind__ === "sold" ? {
+        sold: value.sold
+    } : value.__kind__ === "givenToSomeone" ? {
+        givenToSomeone: value.givenToSomeone
+    } : value.__kind__ === "replacedWithNewPhone" ? {
+        replacedWithNewPhone: value.replacedWithNewPhone
     } : value;
 }
 export interface CreateActorOptions {

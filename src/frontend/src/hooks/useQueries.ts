@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, Phone, TheftReport, PhoneStatus, Notification, Statistics, AccessState, InviteCode, IMEIEvent, InviteCodeWithStatus } from '../backend';
+import type { UserProfile, Phone, TheftReport, PhoneStatus, Notification, Statistics, AccessState, InviteCode, IMEIEvent, InviteCodeWithStatus, ReleaseOwnershipReason, UserRole } from '../backend';
 import { useInternetIdentity } from './useInternetIdentity';
 import { toast } from 'sonner';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -23,10 +23,26 @@ export function useGetAccessState() {
   });
 }
 
+// User Access Query (for activation status)
+export function useHasUserAccess() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<boolean>({
+    queryKey: ['hasUserAccess', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.hasUserAccess();
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+    retry: false,
+  });
+}
+
 // User Profile Queries
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
-  const { data: accessState } = useGetAccessState();
+  const { data: hasAccess } = useHasUserAccess();
 
   const query = useQuery<UserProfile | null>({
     queryKey: ['currentUserProfile'],
@@ -34,14 +50,14 @@ export function useGetCallerUserProfile() {
       if (!actor) throw new Error('Actor not available');
       return actor.getCallerUserProfile();
     },
-    enabled: !!actor && !actorFetching && !!accessState?.isUser,
+    enabled: !!actor && !actorFetching && hasAccess === true,
     retry: false,
   });
 
   return {
     ...query,
     isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && !!accessState?.isUser && query.isFetched,
+    isFetched: !!actor && hasAccess === true && query.isFetched,
   };
 }
 
@@ -64,10 +80,37 @@ export function useSaveCallerUserProfile() {
   });
 }
 
+// Admin User Activation
+export function useActivateUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      // Import UserRole enum and use it correctly
+      const { UserRole } = await import('../backend');
+      return actor.assignCallerUserRole(userPrincipal, UserRole.user);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hasUserAccess'] });
+      toast.success('User activated successfully! They can now register phones.');
+    },
+    onError: (error: Error) => {
+      const message = error.message.toLowerCase();
+      if (message.includes('unauthorized') || message.includes('admin')) {
+        toast.error('Only admins can activate users');
+      } else {
+        toast.error('Failed to activate user: ' + error.message);
+      }
+    },
+  });
+}
+
 // PIN Management Queries
 export function useHasPin() {
   const { actor, isFetching: actorFetching } = useActor();
-  const { data: accessState } = useGetAccessState();
+  const { data: hasAccess } = useHasUserAccess();
 
   return useQuery<boolean>({
     queryKey: ['hasPin'],
@@ -75,7 +118,7 @@ export function useHasPin() {
       if (!actor) return false;
       return actor.hasPin();
     },
-    enabled: !!actor && !actorFetching && !!accessState?.isUser,
+    enabled: !!actor && !actorFetching && hasAccess === true,
   });
 }
 
@@ -114,7 +157,7 @@ export function useSetOrChangePin() {
   });
 }
 
-// Admin Invite Management (using existing backend methods)
+// Admin Invite Management (keeping for backward compatibility, but not used in new flow)
 export function useGenerateInviteCode() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -124,9 +167,9 @@ export function useGenerateInviteCode() {
       if (!actor) throw new Error('Actor not available');
       return actor.generateInviteCode();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inviteCodes'] });
-      queryClient.invalidateQueries({ queryKey: ['inviteCodesWithStatus'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['inviteCodesWithStatus'] });
+      await queryClient.refetchQueries({ queryKey: ['inviteCodes'] });
       toast.success(i18n.t('toast.inviteGenerated'));
     },
     onError: (error: Error) => {
@@ -142,7 +185,7 @@ export function useGenerateInviteCode() {
 
 export function useGetInviteCodes() {
   const { actor, isFetching: actorFetching } = useActor();
-  const { data: accessState } = useGetAccessState();
+  const { data: isAdmin } = useIsCurrentUserAdmin();
 
   return useQuery<InviteCode[]>({
     queryKey: ['inviteCodes'],
@@ -150,15 +193,15 @@ export function useGetInviteCodes() {
       if (!actor) return [];
       return actor.getInviteCodes();
     },
-    enabled: !!actor && !actorFetching && !!accessState?.isAdmin,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    enabled: !!actor && !actorFetching && !!isAdmin,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 
 export function useGetInviteCodesWithStatus() {
   const { actor, isFetching: actorFetching } = useActor();
-  const { data: accessState } = useGetAccessState();
+  const { data: isAdmin } = useIsCurrentUserAdmin();
 
   return useQuery<InviteCodeWithStatus[]>({
     queryKey: ['inviteCodesWithStatus'],
@@ -166,17 +209,17 @@ export function useGetInviteCodesWithStatus() {
       if (!actor) return [];
       return actor.getInviteCodesWithStatus();
     },
-    enabled: !!actor && !actorFetching && !!accessState?.isAdmin,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    enabled: !!actor && !actorFetching && !!isAdmin,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 
-// Phone Queries
+// Phone Management Queries
 export function useGetUserPhones() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
-  const { data: accessState } = useGetAccessState();
+  const { data: hasAccess } = useHasUserAccess();
 
   return useQuery<Phone[]>({
     queryKey: ['userPhones', identity?.getPrincipal().toString()],
@@ -184,7 +227,7 @@ export function useGetUserPhones() {
       if (!actor || !identity) return [];
       return actor.getUserPhones(identity.getPrincipal());
     },
-    enabled: !!actor && !actorFetching && !!identity && !!accessState?.isUser,
+    enabled: !!actor && !actorFetching && !!identity && hasAccess === true,
   });
 }
 
@@ -199,7 +242,6 @@ export function useAddPhone() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPhones'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
       queryClient.invalidateQueries({ queryKey: ['hasPin'] });
       toast.success(i18n.t('toast.phoneRegistered'));
@@ -215,22 +257,18 @@ export function useReleasePhone() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ imei, pin }: { imei: string; pin: string }) => {
+    mutationFn: async ({ imei, pin, reason }: { imei: string; pin: string; reason: ReleaseOwnershipReason }) => {
       if (!actor) throw new Error('Actor not available');
-      
-      // Call immediate release method
-      return actor.releasePhone(imei, pin);
+      return actor.releasePhone(imei, pin, reason);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPhones'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
-      toast.success('Phone ownership released successfully');
+      toast.success(i18n.t('toast.releaseSubmitted'));
     },
-    onError: (error: unknown) => {
-      // Use the safe error extraction utility
-      const userMessage = extractReleaseErrorMessage(error);
-      toast.error(userMessage);
+    onError: (error: Error) => {
+      const friendlyMessage = extractReleaseErrorMessage(error);
+      toast.error(friendlyMessage);
     },
   });
 }
@@ -241,24 +279,13 @@ export function useReportLostStolen() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      imei, 
-      location, 
-      details, 
-      isStolen 
-    }: { 
-      imei: string; 
-      location: string; 
-      details: string; 
-      isStolen: boolean;
-    }) => {
+    mutationFn: async ({ imei, location, details, isStolen }: { imei: string; location: string; details: string; isStolen: boolean }) => {
       if (!actor) throw new Error('Actor not available');
       return actor.reportLostStolen(imei, location, details, isStolen);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPhones'] });
       queryClient.invalidateQueries({ queryKey: ['theftReports'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
       toast.success(i18n.t('toast.reportSubmitted'));
     },
@@ -273,20 +300,13 @@ export function useReportFound() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      imei, 
-      finderInfo 
-    }: { 
-      imei: string; 
-      finderInfo: string | null;
-    }) => {
+    mutationFn: async ({ imei, finderInfo }: { imei: string; finderInfo: string | null }) => {
       if (!actor) throw new Error('Actor not available');
       return actor.reportFound(imei, finderInfo);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPhones'] });
       queryClient.invalidateQueries({ queryKey: ['theftReports'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
       toast.success(i18n.t('toast.foundReportSubmitted'));
     },
@@ -309,12 +329,12 @@ export function useGetAllTheftReports() {
   });
 }
 
-// IMEI Check Query
+// IMEI Check Queries
 export function useCheckImei(imei: string) {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<PhoneStatus | null>({
-    queryKey: ['checkImei', imei],
+    queryKey: ['imeiCheck', imei],
     queryFn: async () => {
       if (!actor || !imei) return null;
       return actor.checkImei(imei);
@@ -323,9 +343,9 @@ export function useCheckImei(imei: string) {
   });
 }
 
-// IMEI History Query
 export function useGetIMEIHistory(imei: string) {
   const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
 
   return useQuery<IMEIEvent[]>({
     queryKey: ['imeiHistory', imei],
@@ -333,24 +353,35 @@ export function useGetIMEIHistory(imei: string) {
       if (!actor || !imei) return [];
       return actor.getIMEIHistory(imei);
     },
-    enabled: !!actor && !actorFetching && !!imei && imei.length >= 15,
+    enabled: !!actor && !actorFetching && !!imei && !!identity,
   });
 }
 
-// Notification Queries
-export function useGetNotifications() {
+// Statistics Query
+export function useGetStatistics() {
   const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
-  const { data: accessState } = useGetAccessState();
+
+  return useQuery<Statistics>({
+    queryKey: ['statistics'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getStatistics();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+// Notifications Queries
+export function useGetNotifications(user: Principal | undefined) {
+  const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<Notification[]>({
-    queryKey: ['notifications', identity?.getPrincipal().toString()],
+    queryKey: ['notifications', user?.toString()],
     queryFn: async () => {
-      if (!actor || !identity) return [];
-      return actor.getNotifications(identity.getPrincipal());
+      if (!actor || !user) return [];
+      return actor.getNotifications(user);
     },
-    enabled: !!actor && !actorFetching && !!identity && !!accessState?.isUser,
-    refetchInterval: 10000,
+    enabled: !!actor && !actorFetching && !!user,
   });
 }
 
@@ -391,24 +422,7 @@ export function useMarkAllNotificationsAsRead() {
   });
 }
 
-// Statistics Queries
-export function useGetStatistics() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<Statistics>({
-    queryKey: ['statistics'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getStatistics();
-    },
-    enabled: !!actor && !actorFetching,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-    staleTime: 0,
-  });
-}
-
-// Admin Check
+// Admin Check Query
 export function useIsCurrentUserAdmin() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
@@ -420,38 +434,5 @@ export function useIsCurrentUserAdmin() {
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !actorFetching && !!identity,
-  });
-}
-
-// Invite Redemption
-export function useRedeemInviteCode() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (inviteCode: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.redeemInviteCode(inviteCode);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accessState'] });
-      queryClient.invalidateQueries({ queryKey: ['inviteCodesWithStatus'] });
-      queryClient.invalidateQueries({ queryKey: ['inviteCodes'] });
-      toast.success('Invite code redeemed successfully! You now have access.');
-    },
-    onError: (error: Error) => {
-      const message = error.message.toLowerCase();
-      if (message.includes('already been used')) {
-        toast.error('This invite code has already been used');
-      } else if (message.includes('deactivated')) {
-        toast.error('This invite code has been deactivated');
-      } else if (message.includes('invalid')) {
-        toast.error('Invalid invite code');
-      } else if (message.includes('already have user access')) {
-        toast.error('You already have user access');
-      } else {
-        toast.error('Failed to redeem invite code: ' + error.message);
-      }
-    },
   });
 }

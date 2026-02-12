@@ -45,8 +45,7 @@ export const EventType = IDL.Variant({
   'reRegistered' : IDL.Null,
   'stolenReported' : IDL.Null,
   'lostReported' : IDL.Null,
-  'ownershipRevoked' : IDL.Null,
-  'ownershipReleaseRequested' : IDL.Null,
+  'ownershipReleased' : IDL.Null,
   'ownershipTransferred' : IDL.Null,
   'foundReported' : IDL.Null,
   'registered' : IDL.Null,
@@ -110,6 +109,12 @@ export const Phone = IDL.Record({
   'imei' : IDL.Text,
   'brand' : IDL.Text,
 });
+export const ReleaseOwnershipReason = IDL.Variant({
+  'other' : IDL.Text,
+  'sold' : IDL.Null,
+  'givenToSomeone' : IDL.Null,
+  'replacedWithNewPhone' : IDL.Null,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -150,7 +155,11 @@ export const idlService = IDL.Service({
   'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
   'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
   'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
-  'releasePhone' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'releasePhone' : IDL.Func(
+      [IDL.Text, IDL.Text, ReleaseOwnershipReason],
+      [],
+      [],
+    ),
   'reportFound' : IDL.Func([IDL.Text, IDL.Opt(IDL.Text)], [], []),
   'reportLostStolen' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
@@ -201,8 +210,7 @@ export const idlFactory = ({ IDL }) => {
     'reRegistered' : IDL.Null,
     'stolenReported' : IDL.Null,
     'lostReported' : IDL.Null,
-    'ownershipRevoked' : IDL.Null,
-    'ownershipReleaseRequested' : IDL.Null,
+    'ownershipReleased' : IDL.Null,
     'ownershipTransferred' : IDL.Null,
     'foundReported' : IDL.Null,
     'registered' : IDL.Null,
@@ -266,6 +274,12 @@ export const idlFactory = ({ IDL }) => {
     'imei' : IDL.Text,
     'brand' : IDL.Text,
   });
+  const ReleaseOwnershipReason = IDL.Variant({
+    'other' : IDL.Text,
+    'sold' : IDL.Null,
+    'givenToSomeone' : IDL.Null,
+    'replacedWithNewPhone' : IDL.Null,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -306,7 +320,11 @@ export const idlFactory = ({ IDL }) => {
     'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
     'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
     'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
-    'releasePhone' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'releasePhone' : IDL.Func(
+        [IDL.Text, IDL.Text, ReleaseOwnershipReason],
+        [],
+        [],
+      ),
     'reportFound' : IDL.Func([IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'reportLostStolen' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],

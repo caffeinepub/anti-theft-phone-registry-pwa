@@ -1,68 +1,12 @@
 {
   "kind": "build_request",
-  "title": "Fix crash/garbled output when releasing phone ownership",
-  "priority": "high",
-  "requirements": [
-    {
-      "id": "REQ-1",
-      "text": "Fix the \"Release Phone Ownership\" flow so that if releasing a phone fails, the UI never displays raw code/JSON/debug output; it must show a clean, user-friendly error message instead and keep the dialog usable.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "ini kenapa ketika mau pelepasan ponsel error dan muncul codingan. Ini saya screenshot supaya anda bisa lihat"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When the release action fails (e.g., wrong PIN, unauthorized, phone not found), the app shows an error toast/message in plain English and does not render any raw JSON or code-like output on screen.",
-        "The release dialog remains interactive after an error (user can correct the PIN/confirmation and retry, or cancel).",
-        "No React runtime error occurs from rendering non-string error objects (e.g., objects/arrays/bigints) inside JSX or toasts."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Harden error handling for the release ownership mutation so it safely extracts a readable message from Internet Computer agent errors (reject message, error objects, unknown thrown values) and maps known backend trap strings (e.g., \"Invalid PIN\", \"You must set a 4-digit PIN...\", \"Unauthorized...\") to consistent English UI messages.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "error dan muncul codingan"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`useReleasePhone` converts unknown/structured thrown values into a safe string message (no `[object Object]`, no dumped JSON).",
-        "Known errors are mapped to consistent English text: invalid PIN, PIN not set, unauthorized owner, and IMEI not found.",
-        "On success, the success toast remains in English and the user phones list refreshes (React Query invalidation still works)."
-      ]
-    }
-  ],
-  "constraints": [
-    "Do not edit any files under frontend/src/components/ui or any paths listed in frontend.immutablePaths.",
-    "Backend must remain a single-actor Motoko canister; do not introduce additional backend services."
-  ],
-  "nonGoals": [
-    "Do not change the business logic of when a phone can be released (still requires correct PIN and ownership).",
-    "Do not add new authentication methods beyond Internet Identity.",
-    "Do not redesign the entire UI beyond what is needed to prevent the error/code output and present a clear error message."
-  ],
+  "title": "Untitled request",
+  "priority": "normal",
+  "requirements": [],
+  "constraints": [],
+  "nonGoals": [],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [
-      "Prefer all user-facing UI text in English for errors/toasts related to releasing phone ownership."
-    ],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

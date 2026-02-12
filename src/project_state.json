@@ -1,32 +1,43 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "summary": "Project involves Internet Identity login with an admin-controlled activation/token system: users can access the app without an invite token, but cannot register a phone until their account is activated via an admin-provided invitation token tied to their Internet Identity.",
+  "architectural_notes": [
+    "Invitation tokens must be single-use and tied to a specific Internet Identity; enforce consumption server-side to prevent reuse via shared links.",
+    "Introduce user activation state gating: login allowed for all, but phone registration requires activated=true."
+  ],
   "known_issues": [
-    "Error occurs during \"pelepasan ponsel\" action; user reports an error with code shown (screenshot referenced)."
+    "Invitation token can be generated multiple times, used by users, but remains marked Unused; link remains reusable allowing multiple registrations."
   ],
   "isFixRequest": true,
-  "existing_features": [
+  "existing_features": [],
+  "new_feature_requests": [
     {
-      "id": "feature-fix-the-release-phone-ownership-flow-so-that-if-releasing-a-phone-fails-the-ui-never-displays-raw-code-json-debug-output-it-must-show-a-clean-user-friendly-error-message-instead-and-keep-the-dialog-usable",
-      "title": "Fix the \"Release Phone Ownership\" flow so that if releasing a phone fails, the UI never displays raw code/JSON/debug output; it must show a clean, user-friendly error message instead and keep the dialog usable.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
+      "id": "AR-1",
+      "summary": "Fix invitation token logic: once used it must be marked Used/Consumed and cannot be reused/shared; token status must reflect actual usage",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "id": "feature-harden-error-handling-for-the-release-ownership-mutation-so-it-safely-extracts-a-readable-message-from-internet-computer-agent-errors-reject-message-error-objects-unknown-thrown-values-and-maps-known-backend-trap-strings-e-g-invalid-pin-you-must-set-a-4-digit-pin-unauthorized-to-consistent-english-ui-messages",
-      "title": "Harden error handling for the release ownership mutation so it safely extracts a readable message from Internet Computer agent errors (reject message, error objects, unknown thrown values) and maps known backend trap strings (e.g., \"Invalid PIN\", \"You must set a 4-digit PIN...\", \"Unauthorized...\") to consistent English UI messages.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
+      "id": "AR-2",
+      "summary": "Change onboarding flow: allow anyone to open the app and login with Internet Identity without an invite token; block phone registration until admin activation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add user profile activation status UI (Nonaktif/Aktif) and allow user to enter/generate activation using admin-provided invitation token; only after active can user register phone",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Admin activation process: user sends Internet Identity to admin; admin issues invitation token for that identity to activate the account",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix crash/garbled output when releasing phone ownership",
+  "projectName": "Untitled request",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

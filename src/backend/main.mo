@@ -4,18 +4,17 @@ import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-import MixinAuthorization "authorization/MixinAuthorization";
+import Iter "mo:core/Iter";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Text "mo:core/Text";
+import Random "mo:core/Random";
+import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Iter "mo:core/Iter";
 import Notification "lib/Notification";
 import Statistics "lib/Statistics";
-import Random "mo:core/Random";
+
 import InviteLinksModule "invite-links/invite-links-module";
-
-
 
 actor {
   type PhoneStatus = { #active; #lost; #stolen };
@@ -67,13 +66,18 @@ actor {
     deactivated : Bool;
   };
 
-  type ReleaseRequest = {
-    id : Nat;
-    owner : Principal;
+  public type ReleaseOwnershipReason = {
+    #sold;
+    #givenToSomeone;
+    #replacedWithNewPhone;
+    #other : Text;
+  };
+
+  type OwnershipReleaseRecord = {
     imei : Text;
-    reason : Text;
-    verified : Bool;
+    previousOwner : Principal;
     timestamp : Time.Time;
+    reason : ReleaseOwnershipReason;
   };
 
   module Phone {
@@ -94,12 +98,11 @@ actor {
   let theftReports = Map.empty<Text, TheftReport>();
   let foundReports = Map.empty<Text, FoundReport>();
   let notifications = Map.empty<Principal, List.List<Notification>>();
-  let releaseRequests = Map.empty<Principal, List.List<ReleaseRequest>>();
   let invitesWithStatus = Map.empty<Text, InviteCodeWithStatus>();
+  let ownershipReleaseHistory = Map.empty<Text, List.List<OwnershipReleaseRecord>>();
   // PIN storage.
   let pins = Map.empty<Principal, Text>();
   let accessControlState = AccessControl.initState();
-  var nextReleaseRequestId = 0;
 
   // Migrate state for Invite Links System
   let inviteLinksState = InviteLinksModule.initState();
@@ -117,10 +120,16 @@ actor {
   };
 
   public query ({ caller }) func hasPin() : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can check PIN status");
+    };
     pins.containsKey(caller);
   };
 
   public shared ({ caller }) func validatePin(pin : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can validate PIN");
+    };
     switch (pins.get(caller)) {
       case (?storedPin) {
         if (storedPin != pin) {
@@ -159,13 +168,45 @@ actor {
     #stolenReported;
     #foundReported;
     #ownershipTransferred;
-    #ownershipReleaseRequested;
-    #ownershipRevoked;
+    #ownershipReleased;
     #reRegistered;
   };
 
-  public query func getIMEIHistory(imei : Text) : async [IMEIEvent] {
-    // Public function - no authorization required (for public "Check IMEI" page)
+  public query ({ caller }) func getIMEIHistory(imei : Text) : async [IMEIEvent] {
+    // Authorization: Only authenticated users can view detailed IMEI history
+    // Admins can view any IMEI, users can only view their own phones' history
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view IMEI history");
+    };
+
+    // Check ownership unless caller is admin
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      switch (phones.get(imei)) {
+        case (?phone) {
+          if (phone.owner != caller) {
+            Runtime.trap("Unauthorized: You can only view history of your own phones");
+          };
+        };
+        case (null) {
+          // Check if caller was a previous owner
+          var wasPreviousOwner = false;
+          switch (ownershipReleaseHistory.get(imei)) {
+            case (?releases) {
+              for (release in releases.values()) {
+                if (release.previousOwner == caller) {
+                  wasPreviousOwner := true;
+                };
+              };
+            };
+            case (null) {};
+          };
+          if (not wasPreviousOwner) {
+            Runtime.trap("Unauthorized: You can only view history of your own phones");
+          };
+        };
+      };
+    };
+
     let events : List.List<IMEIEvent> = List.empty<IMEIEvent>();
 
     // Check if phone exists and add registration event
@@ -207,17 +248,24 @@ actor {
       case (null) {};
     };
 
-    // Add ownership transfer and release events
-    for (requests in releaseRequests.values()) {
-      for (request in requests.values()) {
-        if (request.imei == imei) {
+    // Add ownership release events with reasons
+    switch (ownershipReleaseHistory.get(imei)) {
+      case (?releases) {
+        for (release in releases.values()) {
+          let reasonText = switch (release.reason) {
+            case (#sold) { "Sold" };
+            case (#givenToSomeone) { "Given to someone" };
+            case (#replacedWithNewPhone) { "Replaced with a new phone" };
+            case (#other(text)) { "Other: " # text };
+          };
           events.add({
-            eventType = #ownershipReleaseRequested;
-            timestamp = request.timestamp;
-            details = "Request to release ownership";
+            eventType = #ownershipReleased;
+            timestamp = release.timestamp;
+            details = "Ownership released. Reason: " # reasonText;
           });
         };
       };
+      case (null) {};
     };
 
     events.toArray();
@@ -273,7 +321,7 @@ actor {
           Runtime.trap("This invite code has already been used");
         };
 
-        // Mark invite as used with timestamp and user
+        // Mark invite as used IMMEDIATELY with timestamp and user
         let updatedInvite : InviteCodeWithStatus = {
           code = invite.code;
           created = invite.created;
@@ -295,8 +343,11 @@ actor {
   };
 
   public shared ({ caller }) func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
-    // Authorization: Must be authenticated (at least guest level)
-    // Guests can RSVP, but we verify the invite code exists
+    // Authorization: Must be authenticated user (not guest)
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can submit RSVPs");
+    };
+
     switch (invitesWithStatus.get(inviteCode)) {
       case (?invite) {
         if (invite.deactivated) {
@@ -490,7 +541,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func releasePhone(imei : Text, pin : Text) : async () {
+  public shared ({ caller }) func releasePhone(imei : Text, pin : Text, reason : ReleaseOwnershipReason) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be logged in to release phone");
     };
@@ -513,7 +564,25 @@ actor {
         if (phone.owner != caller) {
           Runtime.trap("Unauthorized: Only the owner can release this phone");
         };
+
+        // Record the ownership release with reason
+        let releaseRecord : OwnershipReleaseRecord = {
+          imei;
+          previousOwner = caller;
+          timestamp = Time.now();
+          reason;
+        };
+
+        let currentHistory = switch (ownershipReleaseHistory.get(imei)) {
+          case (null) { List.empty<OwnershipReleaseRecord>() };
+          case (?history) { history };
+        };
+        currentHistory.add(releaseRecord);
+        ownershipReleaseHistory.add(imei, currentHistory);
+
+        // Remove phone from registry
         phones.remove(imei);
+
         _sendNotification(
           caller,
           "HP berhasil dirilis",
@@ -798,4 +867,5 @@ actor {
       false;
     };
   };
+
 };

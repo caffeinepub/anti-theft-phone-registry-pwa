@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useGetUserPhones, useAddPhone, useReleasePhone, useHasPin } from '../hooks/useQueries';
+import { useGetUserPhones, useAddPhone, useReleasePhone, useHasPin, useHasUserAccess } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Smartphone, Plus, Loader2, Trash2, AlertTriangle, Lock, KeyRound } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Smartphone, Plus, Loader2, Trash2, AlertTriangle, Lock, KeyRound, XCircle } from 'lucide-react';
 import { PhoneStatus } from '../backend';
 import { useNavigate } from '@tanstack/react-router';
 import PinSettingsDialog from '../components/PinSettingsDialog';
@@ -14,6 +16,7 @@ import PinSettingsDialog from '../components/PinSettingsDialog';
 export default function MyPhonesPage() {
   const { data: phones = [], isLoading } = useGetUserPhones();
   const { data: hasPin, isLoading: checkingPin } = useHasPin();
+  const { data: isActivated, isLoading: checkingActivation } = useHasUserAccess();
   const addPhone = useAddPhone();
   const releasePhone = useReleasePhone();
   const navigate = useNavigate();
@@ -32,8 +35,15 @@ export default function MyPhonesPage() {
   const [selectedPhone, setSelectedPhone] = useState<{ imei: string; brand: string; model: string } | null>(null);
   const [pin, setPin] = useState('');
   const [confirmationInput, setConfirmationInput] = useState('');
+  const [releaseReason, setReleaseReason] = useState<string>('');
+  const [otherReasonText, setOtherReasonText] = useState('');
 
   const handleOpenAddDialog = () => {
+    // Check if user is activated before allowing phone registration
+    if (!isActivated) {
+      return;
+    }
+    
     setImei('');
     setBrand('');
     setModel('');
@@ -97,11 +107,13 @@ export default function MyPhonesPage() {
     setSelectedPhone(phone);
     setPin('');
     setConfirmationInput('');
+    setReleaseReason('');
+    setOtherReasonText('');
     setIsReleaseDialogOpen(true);
   };
 
   const handleRelease = () => {
-    if (!selectedPhone || !pin || !confirmationInput) {
+    if (!selectedPhone || !pin || !confirmationInput || !releaseReason) {
       return;
     }
 
@@ -111,10 +123,35 @@ export default function MyPhonesPage() {
       return;
     }
 
+    // If reason is "other", require otherReasonText
+    if (releaseReason === 'other' && !otherReasonText.trim()) {
+      return;
+    }
+
+    // Build the reason object based on backend type
+    let reasonObject;
+    switch (releaseReason) {
+      case 'sold':
+        reasonObject = { __kind__: 'sold' as const, sold: null };
+        break;
+      case 'given':
+        reasonObject = { __kind__: 'givenToSomeone' as const, givenToSomeone: null };
+        break;
+      case 'replaced':
+        reasonObject = { __kind__: 'replacedWithNewPhone' as const, replacedWithNewPhone: null };
+        break;
+      case 'other':
+        reasonObject = { __kind__: 'other' as const, other: otherReasonText.trim() };
+        break;
+      default:
+        return;
+    }
+
     releasePhone.mutate(
       { 
         imei: selectedPhone.imei, 
-        pin: pin
+        pin: pin,
+        reason: reasonObject
       },
       {
         onSuccess: () => {
@@ -123,6 +160,8 @@ export default function MyPhonesPage() {
           setSelectedPhone(null);
           setPin('');
           setConfirmationInput('');
+          setReleaseReason('');
+          setOtherReasonText('');
         },
         // Note: onError is handled by the mutation hook with toast
         // Dialog stays open on error so user can correct and retry
@@ -131,11 +170,18 @@ export default function MyPhonesPage() {
   };
 
   const isReleaseFormValid = () => {
-    if (!selectedPhone || !pin || pin.length !== 4 || !confirmationInput) {
+    if (!selectedPhone || !pin || pin.length !== 4 || !confirmationInput || !releaseReason) {
       return false;
     }
     const last4Digits = selectedPhone.imei.slice(-4);
-    return confirmationInput === last4Digits;
+    if (confirmationInput !== last4Digits) {
+      return false;
+    }
+    // If reason is "other", require otherReasonText
+    if (releaseReason === 'other' && !otherReasonText.trim()) {
+      return false;
+    }
+    return true;
   };
 
   const isRegistrationFormValid = imei.length >= 15 && brand && model && registrationPin.length === 4;
@@ -165,12 +211,34 @@ export default function MyPhonesPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-4xl px-4 py-6">
+        {/* Activation Warning */}
+        {!checkingActivation && !isActivated && (
+          <Alert className="mb-6 border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950">
+            <XCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <AlertDescription className="text-yellow-900 dark:text-yellow-100">
+              <p className="font-semibold">Account Not Activated</p>
+              <p className="mt-1 text-sm">
+                Your account needs to be activated by an administrator before you can register phones. 
+                Please contact the admin at{' '}
+                <a 
+                  href="mailto:pasardigital1@gmail.com" 
+                  className="underline hover:text-yellow-700 dark:hover:text-yellow-300"
+                >
+                  pasardigital1@gmail.com
+                </a>
+                {' '}with your Principal ID to request activation.
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Add Phone Button */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               className="mb-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700"
               onClick={handleOpenAddDialog}
+              disabled={!isActivated || checkingActivation}
             >
               <Plus className="mr-2 h-5 w-5" />
               Register New Phone
@@ -207,7 +275,7 @@ export default function MyPhonesPage() {
                   id="brand"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  placeholder="e.g., Samsung, iPhone, Xiaomi"
+                  placeholder="e.g., Samsung, Apple, Xiaomi"
                   required
                   className="mt-1"
                 />
@@ -224,234 +292,125 @@ export default function MyPhonesPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="registrationPin" className="flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
-                  Security PIN (Required)
-                </Label>
+                <Label htmlFor="registrationPin">Security PIN (4 digits)</Label>
                 <Input
                   id="registrationPin"
                   type="password"
                   inputMode="numeric"
-                  placeholder={hasPin ? "Enter your 4-digit PIN" : "Create a 4-digit PIN"}
                   value={registrationPin}
-                  onChange={(e) => setRegistrationPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  onChange={(e) => setRegistrationPin(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter 4-digit PIN"
                   maxLength={4}
                   required
-                  className="mt-1 font-mono text-center text-lg tracking-widest"
-                  autoComplete="off"
+                  className="mt-1"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {hasPin 
-                    ? 'Enter your existing 4-digit PIN'
-                    : 'Create a 4-digit PIN to secure your phone ownership'}
+                  {!hasPin 
+                    ? 'This will be your security PIN for all phone operations'
+                    : 'Enter your existing security PIN'}
                 </p>
               </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={!isRegistrationFormValid || addPhone.isPending}
-              >
-                {addPhone.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Registering...
-                  </>
-                ) : (
-                  'Register Phone'
-                )}
-              </Button>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddDialogOpen(false)}
+                  disabled={addPhone.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!isRegistrationFormValid || addPhone.isPending}
+                >
+                  {addPhone.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    'Register Phone'
+                  )}
+                </Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
 
-        {/* PIN Setup Dialog for new users */}
-        <PinSettingsDialog 
-          open={isPinSetupDialogOpen} 
-          onOpenChange={setIsPinSetupDialogOpen}
-          onPinSetSuccess={handlePinSetupSuccess}
-        />
-
-        {/* Release Ownership Dialog */}
-        <Dialog open={isReleaseDialogOpen} onOpenChange={setIsReleaseDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Release Phone Ownership</DialogTitle>
-              <DialogDescription>
-                This action will immediately remove this phone from your account. Enter your PIN and confirm to proceed.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-500 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-red-800 dark:text-red-200">
-                    <p className="font-semibold">Warning: Immediate Release</p>
-                    <p className="mt-1">
-                      Once you confirm, this phone will be immediately removed from your account. This action cannot be undone. Anyone can register this IMEI after release.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {selectedPhone && (
-                <div className="rounded-lg bg-muted p-3">
-                  <p className="text-sm font-medium">Phone Details:</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedPhone.brand} {selectedPhone.model}
-                  </p>
-                  <p className="text-xs text-muted-foreground font-mono">IMEI: {selectedPhone.imei}</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmationInput" className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-orange-600" />
-                  Confirmation (Required)
-                </Label>
-                <Input
-                  id="confirmationInput"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder={selectedPhone ? `Type last 4 digits: ${selectedPhone.imei.slice(-4)}` : 'Type last 4 digits of IMEI'}
-                  value={confirmationInput}
-                  onChange={(e) => setConfirmationInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  maxLength={4}
-                  className="font-mono text-center text-lg tracking-widest"
-                  autoComplete="off"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Type the last 4 digits of the IMEI to confirm
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pin" className="flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
-                  Security PIN (Required)
-                </Label>
-                <Input
-                  id="pin"
-                  type="password"
-                  inputMode="numeric"
-                  placeholder="Enter your 4-digit PIN"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  maxLength={4}
-                  className="font-mono text-center text-lg tracking-widest"
-                  autoComplete="off"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter the 4-digit PIN you set in your Profile settings
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsReleaseDialogOpen(false)}
-                disabled={releasePhone.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleRelease}
-                disabled={!isReleaseFormValid() || releasePhone.isPending}
-              >
-                {releasePhone.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Releasing...
-                  </>
-                ) : (
-                  'Release Ownership'
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* PIN Not Set Warning for legacy users */}
-        {!checkingPin && !hasPin && phones.length > 0 && (
-          <Card className="mb-6 border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <KeyRound className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-semibold text-yellow-900 dark:text-yellow-100">
-                    Security PIN Required
-                  </p>
-                  <p className="mt-1 text-sm text-yellow-800 dark:text-yellow-200">
-                    You have registered phones but haven't set a security PIN yet. You must set a 4-digit security PIN before you can release ownership of any phone. This adds an extra layer of protection against unauthorized releases.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 border-yellow-600 text-yellow-900 hover:bg-yellow-100 dark:border-yellow-400 dark:text-yellow-100 dark:hover:bg-yellow-900"
-                    onClick={() => navigate({ to: '/profile' })}
-                  >
-                    <Lock className="mr-2 h-4 w-4" />
-                    Set PIN in Profile
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Phones List */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-4 w-3/4 rounded bg-muted"></div>
-                  <div className="mt-2 h-3 w-1/2 rounded bg-muted"></div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : phones.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Smartphone className="mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="text-center text-muted-foreground">
-                No phones registered yet
-              </p>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
-                Click the button above to register your phone
+              <Smartphone className="mb-4 h-16 w-16 text-muted-foreground" />
+              <p className="text-lg font-medium text-muted-foreground">No phones registered yet</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {isActivated 
+                  ? 'Click the button above to register your first phone'
+                  : 'Activate your account to start registering phones'}
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {phones.map((phone) => (
-              <Card key={phone.imei} className="shadow-md transition-shadow hover:shadow-lg">
-                <CardHeader>
+              <Card key={phone.imei} className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
-                        {phone.brand} {phone.model}
-                      </CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">IMEI: {phone.imei}</p>
+                    <div className="flex items-center gap-3">
+                      <Smartphone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          {phone.brand} {phone.model}
+                        </CardTitle>
+                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                          IMEI: {phone.imei}
+                        </p>
+                      </div>
                     </div>
                     {getStatusBadge(phone.status)}
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => openReleaseDialog(phone)}
-                    disabled={!hasPin || checkingPin}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Release Ownership
-                  </Button>
-                  {!hasPin && !checkingPin && (
-                    <p className="mt-2 text-center text-xs text-muted-foreground">
-                      Set a PIN in Profile to enable this action
+                <CardContent className="pt-4">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate({ to: '/check', search: { imei: phone.imei } })}
+                      className="flex-1"
+                    >
+                      View History
+                    </Button>
+                    {phone.status === PhoneStatus.active && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate({ to: '/report-lost', search: { imei: phone.imei } })}
+                          className="flex-1"
+                        >
+                          <AlertTriangle className="mr-2 h-4 w-4" />
+                          Report Lost/Stolen
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => openReleaseDialog(phone)}
+                          disabled={!hasPin}
+                          className="flex-1"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Release Ownership
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  {!hasPin && phone.status === PhoneStatus.active && (
+                    <p className="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
+                      Set a PIN in your profile to release ownership
                     </p>
                   )}
                 </CardContent>
@@ -460,6 +419,134 @@ export default function MyPhonesPage() {
           </div>
         )}
       </div>
+
+      {/* Release Ownership Dialog */}
+      <Dialog open={isReleaseDialogOpen} onOpenChange={setIsReleaseDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Release Phone Ownership
+            </DialogTitle>
+            <DialogDescription>
+              This action will permanently remove this phone from your account. The phone can be registered by a new owner.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPhone && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-sm font-medium">Phone Details:</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {selectedPhone.brand} {selectedPhone.model}
+                </p>
+                <p className="mt-1 font-mono text-xs text-muted-foreground">
+                  IMEI: {selectedPhone.imei}
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="releaseReason">Reason for Release</Label>
+                <Select value={releaseReason} onValueChange={setReleaseReason}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sold">Sold</SelectItem>
+                    <SelectItem value="given">Given to someone</SelectItem>
+                    <SelectItem value="replaced">Replaced with new phone</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {releaseReason === 'other' && (
+                <div>
+                  <Label htmlFor="otherReason">Please specify</Label>
+                  <Input
+                    id="otherReason"
+                    value={otherReasonText}
+                    onChange={(e) => setOtherReasonText(e.target.value)}
+                    placeholder="Enter reason"
+                    className="mt-1"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="releasePin">Security PIN</Label>
+                <Input
+                  id="releasePin"
+                  type="password"
+                  inputMode="numeric"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter your 4-digit PIN"
+                  maxLength={4}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmation">
+                  Type last 4 digits of IMEI to confirm ({selectedPhone.imei.slice(-4)})
+                </Label>
+                <Input
+                  id="confirmation"
+                  type="text"
+                  inputMode="numeric"
+                  value={confirmationInput}
+                  onChange={(e) => setConfirmationInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter last 4 digits"
+                  maxLength={4}
+                  className="mt-1"
+                />
+              </div>
+
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  <strong>Warning:</strong> This action cannot be undone. The phone will be removed from your account immediately.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsReleaseDialogOpen(false)}
+              disabled={releasePhone.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRelease}
+              disabled={!isReleaseFormValid() || releasePhone.isPending}
+            >
+              {releasePhone.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Releasing...
+                </>
+              ) : (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  Release Ownership
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PIN Setup Dialog */}
+      <PinSettingsDialog 
+        open={isPinSetupDialogOpen} 
+        onOpenChange={setIsPinSetupDialogOpen}
+        onPinSetSuccess={handlePinSetupSuccess}
+      />
     </div>
   );
 }
