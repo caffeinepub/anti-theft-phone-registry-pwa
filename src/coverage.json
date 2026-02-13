@@ -1,32 +1,60 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T19:45:07.740Z",
+  "generatedAt": "2026-02-13T18:39:51.867Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 0,
-    "implemented": 0,
-    "items": []
+    "total": 3,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Add a TanStack React Router configuration and route tree so the app no longer renders blank/crashes when `MainLayout` uses `useLocation`, `Link`, and `Outlet`.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/router.tsx",
+          "frontend/src/pages/NotFoundPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/router.tsx",
+          "frontend/src/pages/NotFoundPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Initialize TanStack Router at the application entry point by wrapping the app with `RouterProvider` so route hooks/components never receive a null router store.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Refactor the authenticated/activated UI path so routing renders inside the router context: when the user is fully allowed into the app, render routed content (via `Outlet`) instead of directly rendering `MainLayout` outside of router control.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/router.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/router.tsx"
+        ]
+      }
+    ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/components/ActivationPendingScreen.tsx",
-    "frontend/src/components/InviteGate.tsx",
-    "frontend/src/components/MainLayout.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminInviteManagementPage.tsx",
-    "frontend/src/pages/AdminUserActivationPage.tsx",
-    "frontend/src/pages/MyPhonesPage.tsx",
-    "frontend/src/pages/NotificationsPage.tsx",
-    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/pages/NotFoundPage.tsx",
+    "frontend/src/router.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,5 +1,5 @@
 {
-  "frontend/src/App.tsx": "Main application component with authentication flow, activation status check (replacing invite gate), profile setup modal, and splash screen with loading states.",
+  "frontend/src/App.tsx": "Root route component with authentication flow, activation status check, profile setup modal, splash screen, and Outlet for rendering routed content when user is fully authenticated and activated.",
   "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations including useHasUserAccess for checking activation status, useActivateUser mutation for admin to activate users by Principal ID using correct UserRole enum, and all other phone management, notification, and statistics queries.",
   "frontend/src/components/MainLayout.tsx": "Main layout component with header, language switcher, internationalized bottom navigation tabs including conditional admin tab for user activation, notification badge, and routing between all pages.",
   "frontend/src/components/ProfileSetupModal.tsx": "Modal dialog for first-time user profile setup, collecting name, email, and city information with form validation.",
@@ -32,5 +32,7 @@
   "frontend/src/utils/releaseOwnershipErrors.ts": "Utility for safely extracting user-friendly error messages from release ownership failures, handling IC agent errors, unknown thrown values, and preventing raw JSON/code from appearing in UI.",
   "frontend/src/components/ActivationPendingScreen.tsx": "Screen displayed to authenticated users who are not yet activated, showing their Principal ID with copy functionality and instructions to contact admin for activation.",
   "frontend/src/pages/AdminUserActivationPage.tsx": "Admin-only page for activating user accounts by entering their Principal ID, with validation, instructions, and immediate activation functionality.",
-  "frontend/src/main.tsx": "Application entry point with React Query provider, TanStack Router configuration, and route definitions including new admin user activation route."
+  "frontend/src/main.tsx": "Application entry point with React Query, Internet Identity, and TanStack RouterProvider wrapping the app to provide router context.",
+  "frontend/src/router.tsx": "TanStack React Router configuration with route tree covering all application paths (home, phones, reports, check, notifications, statistics, about, profile, admin) and a Not Found fallback route.",
+  "frontend/src/pages/NotFoundPage.tsx": "Simple 404 page with icon, message, and button to navigate back to home."
 }

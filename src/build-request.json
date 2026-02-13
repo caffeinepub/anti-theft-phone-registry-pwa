@@ -1,10 +1,68 @@
 {
   "kind": "build_request",
-  "title": "Untitled request",
-  "priority": "normal",
-  "requirements": [],
-  "constraints": [],
-  "nonGoals": [],
+  "title": "Fix blank screen by initializing TanStack React Router (RouterProvider + route tree)",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Add a TanStack React Router configuration and route tree so the app no longer renders blank/crashes when `MainLayout` uses `useLocation`, `Link`, and `Outlet`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-last"
+        ],
+        "quotes": [
+          "mana pernaikan nya? masih blank"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new router module exists (e.g., `frontend/src/router.tsx`) that creates a router instance and defines routes for all paths used by the bottom tabs: `/`, `/phones`, `/report-lost`, `/check`, `/notifications`, `/statistics`, `/about`, `/profile`, and `/admin`.",
+        "The router includes a safe fallback for unknown routes (a simple Not Found page) rather than crashing or rendering a blank screen."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Initialize TanStack Router at the application entry point by wrapping the app with `RouterProvider` so route hooks/components never receive a null router store.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-main-tsx"
+        ],
+        "quotes": [
+          "<App /> is rendered without any RouterProvider in main.tsx"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/src/main.tsx` renders `RouterProvider` with the created router instance so the router is available app-wide.",
+        "After this change, the runtime error pattern caused by missing router context (e.g., reading `__store` of null) no longer occurs."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Refactor the authenticated/activated UI path so routing renders inside the router context: when the user is fully allowed into the app, render routed content (via `Outlet`) instead of directly rendering `MainLayout` outside of router control.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-app-tsx"
+        ],
+        "quotes": [
+          "App currently renders <MainLayout /> while MainLayout contains <Outlet /> from @tanstack/react-router"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When authenticated + activated + profile complete, the app renders router-driven content (so `MainLayout` and its `Outlet` are mounted as part of a route).",
+        "All bottom navigation links in `MainLayout` navigate without blank screen, and the correct page component renders for each tab."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under `frontend/src/components/ui` (compose existing UI components only).",
+    "Do not modify immutable hook entrypoints: `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, or `frontend/src/main.tsx` alternatives outside the immutable paths list; however `frontend/src/main.tsx` itself is allowed to be edited per SYSTEM_CONTEXT (it is not in immutablePaths)."
+  ],
+  "nonGoals": [
+    "Do not change invitation token logic, activation logic, or backend canister behavior as part of this fix.",
+    "Do not redesign UI/branding; only address the routing crash/blank screen and ensure navigation works."
+  ],
   "imageRequirements": {
     "required": [],
     "edits": []

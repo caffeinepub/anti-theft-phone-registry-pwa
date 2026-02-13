@@ -1,4 +1,47 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-add-a-tanstack-react-router-configuration-and-route-tree-so-the-app-no-longer-renders-blank-crashes-when-mainlayout-uses-uselocation-link-and-outlet",
+      "featureTitle": "Add a TanStack React Router configuration and route tree so the app no longer renders blank/crashes when `MainLayout` uses `useLocation`, `Link`, and `Outlet`.",
+      "files": [
+        "frontend/src/pages/NotFoundPage.tsx",
+        "frontend/src/router.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-refactor-the-authenticated-activated-ui-path-so-routing-renders-inside-the-router-context-when-the-user-is-fully-allowed-into-the-app-render-routed-content-via-outlet-instead-of-directly-rendering-mainlayout-outside-of-router-control",
+      "featureTitle": "Refactor the authenticated/activated UI path so routing renders inside the router context: when the user is fully allowed into the app, render routed content (via `Outlet`) instead of directly rendering `MainLayout` outside of router control.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/router.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

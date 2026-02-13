@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Update the application’s admin/invite and profile/vehicle-registration-access screens to match the latest UI/content shown in the provided screenshots.
+**Goal:** Fix the blank screen/crash by properly initializing TanStack React Router and ensuring `MainLayout` (and its `Outlet`) is rendered within router context.
 
 **Planned changes:**
-- Add/adjust an Admin section showing invite metrics (Total Invites, Unused, Used) and an “All Invites” table with code list, created date, status, used at/by, and copy action.
-- Add/adjust a Profile screen section for “Manage your vehicle registration access” with a status pill (e.g., Activated) and an activation message panel.
-- Add/adjust a Personal Information card with an Edit action and fields like Full Name, Email, City.
+- Add a TanStack React Router module with a route tree covering all bottom-tab paths (`/`, `/phones`, `/report-lost`, `/check`, `/notifications`, `/statistics`, `/about`, `/profile`, `/admin`) plus a simple Not Found fallback route.
+- Update `frontend/src/main.tsx` to wrap the app in `RouterProvider` using the created router instance.
+- Refactor the authenticated/activated “allowed into the app” render path so routed content is rendered via the router (mount `MainLayout` as part of a route instead of rendering it directly outside router control).
 
-**User-visible outcome:** Users can view the updated Admin invites dashboard/table and see updated profile sections for vehicle registration access status and personal information as shown in the screenshots.
+**User-visible outcome:** The app no longer shows a blank screen or crashes; bottom navigation links work and each tab route renders the correct page, with unknown URLs showing a Not Found page.

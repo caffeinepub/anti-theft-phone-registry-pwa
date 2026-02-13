@@ -1,6 +1,62 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Untitled request",
-  "requirements": []
+  "title": "Initialize TanStack React Router to prevent blank screen and restore navigation",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Add a TanStack React Router configuration with a route tree covering all bottom-tab paths and a Not Found fallback.",
+      "acceptanceCriteria": [
+        "A new router module exists (e.g., `frontend/src/router.tsx`) that creates a router instance and defines routes for all paths used by the bottom tabs: `/`, `/phones`, `/report-lost`, `/check`, `/notifications`, `/statistics`, `/about`, `/profile`, and `/admin`.",
+        "The router includes a safe fallback for unknown routes (a simple Not Found page) rather than crashing or rendering a blank screen."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/router.tsx",
+          "operation": "create",
+          "description": "Create the TanStack React Router instance and route tree. Define a root route and nested routes that render existing page components for `/`, `/phones`, `/report-lost`, `/check`, `/notifications`, `/statistics`, `/about`, `/profile`, and `/admin`, and configure a safe Not Found fallback route/component for unknown paths."
+        },
+        {
+          "path": "frontend/src/pages/NotFoundPage.tsx",
+          "operation": "create",
+          "description": "Add a minimal Not Found page UI to be used by the router as the fallback for unknown routes (avoids blank screen/crash when navigating to an unrecognized path)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Wrap the application with TanStack RouterProvider at the entry point so router hooks/components always have context.",
+      "acceptanceCriteria": [
+        "`frontend/src/main.tsx` renders `RouterProvider` with the created router instance so the router is available app-wide.",
+        "After this change, the runtime error pattern caused by missing router context (e.g., reading `__store` of null) no longer occurs."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Initialize TanStack Router at the app entry by rendering `RouterProvider` with the router instance created in `frontend/src/router.tsx`, while preserving existing React Query and Internet Identity providers so router context is available to `useLocation`, `Link`, `Outlet`, and `useNavigate` usages across the app."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Refactor the authenticated/activated allowed path to render router-driven content (Outlet) instead of mounting MainLayout outside router control.",
+      "acceptanceCriteria": [
+        "When authenticated + activated + profile complete, the app renders router-driven content (so `MainLayout` and its `Outlet` are mounted as part of a route).",
+        "All bottom navigation links in `MainLayout` navigate without blank screen, and the correct page component renders for each tab."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Refactor the gating logic so that when the user is fully allowed (authenticated + activated + profile complete), the component returns routed content via TanStack Router `Outlet` instead of rendering `<MainLayout />` directly. Keep existing login/activation/profile gating screens unchanged in behavior and avoid altering invitation token/activation logic."
+        },
+        {
+          "path": "frontend/src/router.tsx",
+          "operation": "modify",
+          "description": "Wire routing so `MainLayout` is mounted as a route component (layout route) and renders its `Outlet` for tab pages, while `App` acts as the root route wrapper (theme/toaster + gating + Outlet) to ensure routed content always renders within router context."
+        }
+      ]
+    }
+  ]
 }

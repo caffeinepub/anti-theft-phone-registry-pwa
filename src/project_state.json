@@ -1,16 +1,35 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "Project involves Internet Identity login with an admin-controlled activation/token system: users can access the app without an invite token, but cannot register a phone until their account is activated via an admin-provided invitation token tied to their Internet Identity.",
   "architectural_notes": [
     "Invitation tokens must be single-use and tied to a specific Internet Identity; enforce consumption server-side to prevent reuse via shared links.",
-    "Introduce user activation state gating: login allowed for all, but phone registration requires activated=true."
+    "Introduce user activation state gating: login allowed for all, but phone registration requires activated=true.",
+    "Frontend must initialize TanStack React Router by creating a router and wrapping the app with <RouterProvider>; otherwise routing hooks/components (useLocation/Link/Outlet) will crash and render a blank screen."
   ],
   "known_issues": [
-    "Invitation token can be generated multiple times, used by users, but remains marked Unused; link remains reusable allowing multiple registrations."
+    "Invitation token can be generated multiple times, used by users, but remains marked Unused; link remains reusable allowing multiple registrations.",
+    "App shows blank/white screen due to TanStack React Router not being initialized (missing RouterProvider/router), causing 'Cannot read properties of null (reading __store)' crash."
   ],
   "isFixRequest": true,
-  "existing_features": [],
+  "existing_features": [
+    {
+      "id": "feature-add-a-tanstack-react-router-configuration-and-route-tree-so-the-app-no-longer-renders-blank-crashes-when-mainlayout-uses-uselocation-link-and-outlet",
+      "title": "Add a TanStack React Router configuration and route tree so the app no longer renders blank/crashes when `MainLayout` uses `useLocation`, `Link`, and `Outlet`.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-the-authenticated-activated-ui-path-so-routing-renders-inside-the-router-context-when-the-user-is-fully-allowed-into-the-app-render-routed-content-via-outlet-instead-of-directly-rendering-mainlayout-outside-of-router-control",
+      "title": "Refactor the authenticated/activated UI path so routing renders inside the router context: when the user is fully allowed into the app, render routed content (via `Outlet`) instead of directly rendering `MainLayout` outside of router control.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
   "new_feature_requests": [
     {
       "id": "AR-1",
@@ -34,6 +53,20 @@
       "id": "AR-4",
       "summary": "Admin activation process: user sends Internet Identity to admin; admin issues invitation token for that identity to activate the account",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Fix blank/white screen crash by properly initializing TanStack React Router (add router setup + RouterProvider) so MainLayout/Outlet/Link/useLocation no longer crash",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Initialize TanStack Router at the application entry point by wrapping the app with `RouterProvider` so route hooks/components never receive a null router store.",
+      "reqIds": [
+        "REQ-2"
+      ],
       "status": "pending"
     }
   ],

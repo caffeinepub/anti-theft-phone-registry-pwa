@@ -1,69 +1,26 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T19:45:07.737Z",
-  "summary": "BuildRequest contains no stated requirements or acceptance criteria, but the diff introduces substantial new functionality across frontend and backend (user activation gating/UI, admin activation page, new React Query hooks, navigation changes, and backend access/PIN logic). With no requested requirements, these changes appear out of scope relative to the provided BuildRequest.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-13T18:39:51.863Z",
+  "summary": "REQ-1 and REQ-3 appear implemented via a new TanStack Router module with a full route tree (including a Not Found fallback) and by refactoring App to render an <Outlet /> for the fully authenticated/activated/profile-complete path. REQ-2 is not evidenced in the diff summary because there is no shown change to frontend/src/main.tsx to wrap the app with <RouterProvider> using the created router instance.",
+  "missing_requirements": [
     {
-      "description": "Added end-user “Activation Pending” screen with principal ID copy, admin contact info, and logout behavior.",
-      "reason": "No requirements were specified in the BuildRequest, yet new UI/behavior was added.",
+      "id": "REQ-2",
+      "requirement": "Initialize TanStack Router at the application entry point by wrapping the app with RouterProvider so route hooks/components never receive a null router store.",
+      "reason": "The diff summary shows a new router instance exported from frontend/src/router.tsx, but does not show any modification to frontend/src/main.tsx to render <RouterProvider router={router}>. Without that entry-point wiring, the router context may still be missing at runtime.",
       "evidence": [
-        "frontend/src/components/ActivationPendingScreen.tsx",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "description": "Added admin user activation page that validates Principal ID and triggers activation via mutation.",
-      "reason": "Not requested by any requirement (BuildRequest has none).",
-      "evidence": [
-        "frontend/src/pages/AdminUserActivationPage.tsx"
-      ]
-    },
-    {
-      "description": "Implemented activation gating in app flow (login allowed, but users without access see activation pending screen; profile setup gated on activation).",
-      "reason": "No requirements were provided to justify this new authentication/authorization flow.",
-      "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ]
-    },
-    {
-      "description": "Added new React Query hooks/mutations for access state and activation (useHasUserAccess, useActivateUser) and changed profile query enablement based on activation.",
-      "reason": "BuildRequest lists no requirements; these are new backend-integration behaviors.",
-      "evidence": [
-        "frontend/src/hooks/useQueries.ts"
-      ]
-    },
-    {
-      "description": "Modified main layout navigation to include conditional admin tab and notification badge behavior tied to queries.",
-      "reason": "Navigation/role-based UI changes were not requested in the BuildRequest.",
-      "evidence": [
-        "frontend/src/components/MainLayout.tsx"
-      ]
-    },
-    {
-      "description": "Backend changes introducing/expanding PIN management and access control-related logic (as shown in truncated backend/main.mo).",
-      "reason": "No backend feature changes were requested (BuildRequest has no requirements).",
-      "evidence": [
-        "backend/main.mo"
+        "frontend/src/router.tsx",
+        "Modified files list does not include frontend/src/main.tsx"
       ]
     }
   ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.83,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/ActivationPendingScreen.tsx",
-    "frontend/src/components/InviteGate.tsx",
-    "frontend/src/components/MainLayout.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminInviteManagementPage.tsx",
-    "frontend/src/pages/AdminUserActivationPage.tsx",
-    "frontend/src/pages/MyPhonesPage.tsx",
-    "frontend/src/pages/NotificationsPage.tsx",
-    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/pages/NotFoundPage.tsx",
+    "frontend/src/router.tsx",
     "project_state.json"
   ]
 }
