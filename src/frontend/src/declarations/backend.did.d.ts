@@ -15,6 +15,15 @@ export interface AccessState {
   'isUser' : boolean,
   'isAdmin' : boolean,
 }
+export interface ActivationTokenInfo {
+  'status' : TokenStatus,
+  'token' : string,
+  'usedAt' : [] | [Time],
+  'createdAt' : Time,
+  'createdBy' : Principal,
+  'createdFor' : Principal,
+  'isUsed' : boolean,
+}
 export type EventType = { 'reRegistered' : null } |
   { 'stolenReported' : null } |
   { 'lostReported' : null } |
@@ -100,6 +109,10 @@ export interface TheftReport {
   'location' : string,
 }
 export type Time = bigint;
+export type TokenStatus = { 'revoked' : null } |
+  { 'expired' : null } |
+  { 'used' : null } |
+  { 'unused' : null };
 export interface UserProfile { 'city' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -109,10 +122,13 @@ export interface _SERVICE {
   'addPhone' : ActorMethod<[string, string, string, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'checkImei' : ActorMethod<[string], [] | [PhoneStatus]>,
+  'checkUserActivationStatus' : ActorMethod<[], boolean>,
   'clearPin' : ActorMethod<[], undefined>,
   'deactivateInviteCode' : ActorMethod<[string], undefined>,
+  'generateActivationToken' : ActorMethod<[Principal], string>,
   'generateInviteCode' : ActorMethod<[], string>,
   'getAccessState' : ActorMethod<[], AccessState>,
+  'getActivationTokenHistory' : ActorMethod<[], Array<ActivationTokenInfo>>,
   'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
   'getAllTheftReports' : ActorMethod<[], Array<TheftReport>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -129,6 +145,7 @@ export interface _SERVICE {
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'markAllNotificationsAsRead' : ActorMethod<[], undefined>,
   'markNotificationAsRead' : ActorMethod<[bigint], undefined>,
+  'redeemActivationToken' : ActorMethod<[string], undefined>,
   'redeemInviteCode' : ActorMethod<[string], undefined>,
   'registerProfile' : ActorMethod<[string, string], undefined>,
   'releasePhone' : ActorMethod<
@@ -143,7 +160,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setOrChangePin' : ActorMethod<[string], undefined>,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
-  'transferOwnership' : ActorMethod<[string, Principal], undefined>,
+  'transferOwnership' : ActorMethod<[string, Principal, string], undefined>,
   'validatePin' : ActorMethod<[string], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

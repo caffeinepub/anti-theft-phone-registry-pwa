@@ -56,7 +56,9 @@ module {
 
   public func hasPermission(state : AccessControlState, caller : Principal, requiredRole : UserRole) : Bool {
     let userRole = getUserRole(state, caller);
-    if (userRole == #admin or requiredRole == #guest) { true } else { userRole == requiredRole };
+    if (userRole == #admin or requiredRole == #guest) { true } else {
+      userRole == requiredRole;
+    };
   };
 
   public func isAdmin(state : AccessControlState, caller : Principal) : Bool {

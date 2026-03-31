@@ -5,9 +5,17 @@
   "login": {
     "title": "Registrasi Anti-Pencurian Ponsel",
     "subtitle": "Lindungi ponsel Anda dan cegah penjualan ponsel curian dengan sistem registrasi terpercaya",
-    "loginButton": "Masuk dengan Internet Identity",
+    "button": "Masuk dengan Internet Identity",
     "loggingIn": "Masuk...",
     "secureLogin": "Sistem login aman menggunakan Internet Identity",
+    "feature1Title": "Daftarkan Ponsel",
+    "feature1Desc": "Catat kepemilikan ponsel Anda dengan IMEI",
+    "feature2Title": "Laporkan Kehilangan",
+    "feature2Desc": "Laporkan ponsel hilang atau dicuri dengan cepat",
+    "feature3Title": "Cek Status IMEI",
+    "feature3Desc": "Periksa status ponsel sebelum membeli",
+    "feature4Title": "Aman & Terpercaya",
+    "feature4Desc": "Data tersimpan aman di blockchain",
     "features": {
       "register": {
         "title": "Daftarkan Ponsel",
@@ -24,6 +32,60 @@
       "secure": {
         "title": "Aman & Terpercaya",
         "description": "Data tersimpan aman di blockchain"
+      }
+    }
+  },
+  "activation": {
+    "pending": {
+      "title": "Akun Menunggu Aktivasi",
+      "subtitle": "Akun Anda perlu diaktifkan oleh administrator sebelum dapat menggunakan aplikasi",
+      "principalLabel": "Principal ID Anda",
+      "copyButton": "Salin",
+      "copiedButton": "Tersalin!",
+      "instructions": "Kirimkan Principal ID Anda ke administrator untuk mendapatkan token aktivasi",
+      "tokenLabel": "Token Aktivasi",
+      "tokenPlaceholder": "Masukkan token aktivasi dari admin",
+      "redeemButton": "Aktifkan Akun",
+      "redeeming": "Mengaktifkan...",
+      "contactAdmin": "Hubungi admin di",
+      "success": "Akun berhasil diaktifkan!",
+      "error": "Token tidak valid atau sudah digunakan"
+    }
+  },
+  "admin": {
+    "activation": {
+      "title": "Aktivasi Pengguna",
+      "subtitle": "Kelola aktivasi akun pengguna dengan token",
+      "generateSection": "Buat Token Aktivasi",
+      "principalLabel": "Principal ID Pengguna",
+      "principalPlaceholder": "Masukkan Principal ID pengguna yang akan diaktifkan",
+      "generateButton": "Buat Token",
+      "generating": "Membuat...",
+      "tokenGenerated": "Token Aktivasi Dibuat",
+      "tokenLabel": "Token",
+      "copyToken": "Salin Token",
+      "tokenCopied": "Token tersalin!",
+      "sendInstructions": "Kirimkan token ini ke pengguna untuk aktivasi akun mereka",
+      "historySection": "Riwayat Token",
+      "historyEmpty": "Belum ada token yang dibuat",
+      "historyColumns": {
+        "token": "Token",
+        "createdFor": "Dibuat Untuk",
+        "createdAt": "Tanggal Dibuat",
+        "status": "Status",
+        "usedAt": "Digunakan Pada"
+      },
+      "status": {
+        "unused": "Belum Digunakan",
+        "used": "Sudah Digunakan",
+        "expired": "Kedaluwarsa",
+        "revoked": "Dibatalkan"
+      },
+      "refreshButton": "Muat Ulang",
+      "error": {
+        "invalidPrincipal": "Principal ID tidak valid",
+        "generateFailed": "Gagal membuat token",
+        "loadFailed": "Gagal memuat riwayat token"
       }
     }
   },
@@ -130,7 +192,11 @@
     "foundReportSubmitted": "Laporan penemuan berhasil dikirim! Pemilik akan diberitahu.",
     "notificationMarkFailed": "Gagal menandai notifikasi",
     "allNotificationsRead": "Semua notifikasi ditandai sudah dibaca",
-    "notificationsMarkFailed": "Gagal menandai notifikasi"
+    "notificationsMarkFailed": "Gagal menandai notifikasi",
+    "tokenGenerated": "Token aktivasi berhasil dibuat",
+    "tokenGenerateFailed": "Gagal membuat token aktivasi",
+    "tokenRedeemed": "Token berhasil digunakan! Akun Anda sekarang aktif.",
+    "tokenRedeemFailed": "Gagal menggunakan token"
   },
   "footer": {
     "copyright": "© 2026 Pasar Digital Community"

@@ -8,13 +8,15 @@ import Iter "mo:core/Iter";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Text "mo:core/Text";
+import Nat "mo:core/Nat";
 import Random "mo:core/Random";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import Notification "lib/Notification";
 import Statistics "lib/Statistics";
-
 import InviteLinksModule "invite-links/invite-links-module";
+
+
 
 actor {
   type PhoneStatus = { #active; #lost; #stolen };
@@ -92,6 +94,34 @@ actor {
     };
   };
 
+  // Activation token types
+  type TokenStatus = {
+    #unused;
+    #used;
+    #expired;
+    #revoked;
+  };
+
+  type ActivationToken = {
+    token : Text;
+    createdBy : Principal;
+    createdFor : Principal;
+    createdAt : Time.Time;
+    isUsed : Bool;
+    usedAt : ?Time.Time;
+    status : TokenStatus;
+  };
+
+  public type ActivationTokenInfo = {
+    token : Text;
+    createdBy : Principal;
+    createdFor : Principal;
+    createdAt : Time.Time;
+    isUsed : Bool;
+    usedAt : ?Time.Time;
+    status : TokenStatus;
+  };
+
   // Storage
   let userProfiles = Map.empty<Principal, UserProfile>();
   let phones = Map.empty<Text, Phone>();
@@ -100,18 +130,15 @@ actor {
   let notifications = Map.empty<Principal, List.List<Notification>>();
   let invitesWithStatus = Map.empty<Text, InviteCodeWithStatus>();
   let ownershipReleaseHistory = Map.empty<Text, List.List<OwnershipReleaseRecord>>();
-  // PIN storage.
   let pins = Map.empty<Principal, Text>();
+  let activationTokens = Map.empty<Text, ActivationToken>();
   let accessControlState = AccessControl.initState();
 
   // Migrate state for Invite Links System
   let inviteLinksState = InviteLinksModule.initState();
   include MixinAuthorization(accessControlState);
 
-  //---------------------------------
   // PIN Management
-  //---------------------------------
-
   public shared ({ caller }) func setOrChangePin(newPin : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can set or change PIN");
@@ -152,10 +179,7 @@ actor {
     pins.remove(caller);
   };
 
-  //---------------------------------
   // IMEI History
-  //---------------------------------
-
   public type IMEIEvent = {
     eventType : EventType;
     timestamp : Time.Time;
@@ -173,13 +197,10 @@ actor {
   };
 
   public query ({ caller }) func getIMEIHistory(imei : Text) : async [IMEIEvent] {
-    // Authorization: Only authenticated users can view detailed IMEI history
-    // Admins can view any IMEI, users can only view their own phones' history
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can view IMEI history");
     };
 
-    // Check ownership unless caller is admin
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       switch (phones.get(imei)) {
         case (?phone) {
@@ -188,7 +209,6 @@ actor {
           };
         };
         case (null) {
-          // Check if caller was a previous owner
           var wasPreviousOwner = false;
           switch (ownershipReleaseHistory.get(imei)) {
             case (?releases) {
@@ -209,7 +229,6 @@ actor {
 
     let events : List.List<IMEIEvent> = List.empty<IMEIEvent>();
 
-    // Check if phone exists and add registration event
     switch (phones.get(imei)) {
       case (?phone) {
         events.add({
@@ -221,7 +240,6 @@ actor {
       case (null) {};
     };
 
-    // Add theft/lost reports
     switch (theftReports.get(imei)) {
       case (?report) {
         let eventType = if (_isReportedAsStolen(imei)) { #stolenReported } else {
@@ -236,7 +254,6 @@ actor {
       case (null) {};
     };
 
-    // Add found reports
     switch (foundReports.get(imei)) {
       case (?report) {
         events.add({
@@ -248,7 +265,6 @@ actor {
       case (null) {};
     };
 
-    // Add ownership release events with reasons
     switch (ownershipReleaseHistory.get(imei)) {
       case (?releases) {
         for (release in releases.values()) {
@@ -278,10 +294,78 @@ actor {
     };
   };
 
-  //---------------------------------
-  // General Access and Invite Codes
-  //---------------------------------
+  // Activation Token Management
+  public shared ({ caller }) func generateActivationToken(targetUser : Principal) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can generate tokens");
+    };
+    let blob = await Random.blob();
+    let token = InviteLinksModule.generateUUID(blob);
 
+    let newToken : ActivationToken = {
+      token;
+      createdBy = caller;
+      createdFor = targetUser;
+      createdAt = Time.now();
+      isUsed = false;
+      usedAt = null;
+      status = #unused;
+    };
+    activationTokens.add(token, newToken);
+
+    token;
+  };
+
+  public shared ({ caller }) func redeemActivationToken(token : Text) : async () {
+    // No authorization check needed - any caller (including guests) can attempt to redeem
+    // The token itself contains the authorization (must match createdFor)
+    
+    switch (activationTokens.get(token)) {
+      case (?tok) {
+        if (tok.createdFor != caller) {
+          Runtime.trap("Token not valid for this account");
+        };
+
+        if (tok.status != #unused or tok.isUsed) {
+          Runtime.trap("Token not valid anymore, please request a new one");
+        };
+
+        let updatedToken : ActivationToken = {
+          token = tok.token;
+          createdBy = tok.createdBy;
+          createdFor = tok.createdFor;
+          createdAt = tok.createdAt;
+          isUsed = true;
+          usedAt = ?Time.now();
+          status = #used;
+        };
+        activationTokens.add(token, updatedToken);
+
+        AccessControl.assignRole(accessControlState, caller, caller, #user);
+      };
+      case (null) {
+        Runtime.trap("Invalid or expired token");
+      };
+    };
+  };
+
+  public query ({ caller }) func getActivationTokenHistory() : async [ActivationTokenInfo] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view token history");
+    };
+    activationTokens.values().toArray().map(func(token) { token });
+  };
+
+  public query ({ caller }) func checkUserActivationStatus() : async Bool {
+    // No authorization check - any caller (including guests) can check their own status
+    if (AccessControl.hasPermission(accessControlState, caller, #user)) {
+      true;
+    } else {
+      false;
+    };
+  };
+
+  // General Access and Invite Codes
   public shared ({ caller }) func generateInviteCode() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can generate invite codes");
@@ -289,7 +373,6 @@ actor {
     let blob = await Random.blob();
     let code = InviteLinksModule.generateUUID(blob);
 
-    // Store invite code with status tracking
     let inviteStatus : InviteCodeWithStatus = {
       code;
       created = Time.now();
@@ -306,12 +389,11 @@ actor {
   };
 
   public shared ({ caller }) func redeemInviteCode(inviteCode : Text) : async () {
-    // Check if caller is already a user
+    // No authorization check - guests can redeem invite codes to become users
     if (AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("You already have user access");
     };
 
-    // Verify invite code exists and is valid
     switch (invitesWithStatus.get(inviteCode)) {
       case (?invite) {
         if (invite.deactivated) {
@@ -321,7 +403,6 @@ actor {
           Runtime.trap("This invite code has already been used");
         };
 
-        // Mark invite as used IMMEDIATELY with timestamp and user
         let updatedInvite : InviteCodeWithStatus = {
           code = invite.code;
           created = invite.created;
@@ -333,7 +414,6 @@ actor {
         };
         invitesWithStatus.add(inviteCode, updatedInvite);
 
-        // Grant user role to the caller
         AccessControl.assignRole(accessControlState, caller, caller, #user);
       };
       case (null) {
@@ -343,7 +423,6 @@ actor {
   };
 
   public shared ({ caller }) func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
-    // Authorization: Must be authenticated user (not guest)
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can submit RSVPs");
     };
@@ -406,11 +485,9 @@ actor {
     };
   };
 
-  //------------------------------
   // Access State Check (Safe API)
-  //------------------------------
-
   public query ({ caller }) func getAccessState() : async AccessState {
+    // No authorization check - any caller can check their own access state
     let isAdmin = AccessControl.isAdmin(accessControlState, caller);
     let isUser = AccessControl.hasPermission(accessControlState, caller, #user);
     let requiresInvite = not isAdmin and not isUser;
@@ -422,10 +499,7 @@ actor {
     };
   };
 
-  //------------------------------
   // User Profile Management
-  //------------------------------
-
   public shared ({ caller }) func registerProfile(email : Text, city : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users with valid invite can register profiles");
@@ -460,26 +534,19 @@ actor {
     userProfiles.get(user);
   };
 
-  //------------------------------
   // Phone Registration
-  //------------------------------
-
   public shared ({ caller }) func addPhone(imei : Text, brand : Text, model : Text, pin : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can add phones");
     };
 
-    // Enforce PIN requirement for new users during phone registration
-    // New users must set a PIN during the IMEI registration flow
     if (not pins.containsKey(caller)) {
-      // User doesn't have a PIN yet, so we set it now during registration
       if (pin.size() != 4) {
         Runtime.trap("PIN must be exactly 4 digits");
       };
       pins.add(caller, pin);
     };
 
-    // Check if IMEI is already registered and active
     switch (phones.get(imei)) {
       case (?existingPhone) {
         if (existingPhone.owner != caller) {
@@ -489,7 +556,6 @@ actor {
         };
       };
       case (null) {
-        // IMEI not found or previously released, proceed with registration
         let phone : Phone = {
           imei;
           brand;
@@ -503,10 +569,22 @@ actor {
     };
   };
 
-  public shared ({ caller }) func transferOwnership(imei : Text, newOwner : Principal) : async () {
+  public shared ({ caller }) func transferOwnership(imei : Text, newOwner : Principal, pin : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Hanya pemilik HP yang dapat melakukan transfer kepemilikan.");
     };
+
+    switch (pins.get(caller)) {
+      case (?storedPin) {
+        if (storedPin != pin) {
+          Runtime.trap("Invalid PIN");
+        };
+      };
+      case (null) {
+        Runtime.trap("You must set a 4-digit PIN before you can transfer ownership");
+      };
+    };
+
     switch (phones.get(imei)) {
       case (?phone) {
         if (phone.owner != caller) {
@@ -546,8 +624,6 @@ actor {
       Runtime.trap("Unauthorized: Must be logged in to release phone");
     };
 
-    // Explicitly check for PIN before releasing phone.
-    // Legacy users without a PIN must set one before performing security actions
     switch (pins.get(caller)) {
       case (?storedPin) {
         if (storedPin != pin) {
@@ -565,7 +641,6 @@ actor {
           Runtime.trap("Unauthorized: Only the owner can release this phone");
         };
 
-        // Record the ownership release with reason
         let releaseRecord : OwnershipReleaseRecord = {
           imei;
           previousOwner = caller;
@@ -580,7 +655,6 @@ actor {
         currentHistory.add(releaseRecord);
         ownershipReleaseHistory.add(imei, currentHistory);
 
-        // Remove phone from registry
         phones.remove(imei);
 
         _sendNotification(
@@ -597,10 +671,7 @@ actor {
     };
   };
 
-  //--------------------------------
   // Phone Reporting
-  //--------------------------------
-
   public shared ({ caller }) func reportLostStolen(imei : Text, location : Text, details : Text, isStolen : Bool) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Hanya pemilik HP yang dapat melaporkan HP mereka.");
@@ -653,7 +724,10 @@ actor {
   };
 
   public shared ({ caller }) func reportFound(imei : Text, finderInfo : ?Text) : async () {
-    // No authorization required - anyone can report finding a phone
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can report found phones");
+    };
+
     switch (phones.get(imei)) {
       case (?phone) {
         let foundReport : FoundReport = {
@@ -690,12 +764,9 @@ actor {
     };
   };
 
-  //------------------------------
   // Statistics
-  //------------------------------
-
   public query func getStatistics() : async Statistics {
-    // Public function - no authorization required
+    // No authorization check - public statistics endpoint
     let totalPhones = phones.size();
     let lostPhones = phones.values().toArray().filter(func(p) { p.status == #lost }).size();
     let stolenPhones = phones.values().toArray().filter(func(p) { p.status == #stolen }).size();
@@ -753,10 +824,7 @@ actor {
     countsByMonth;
   };
 
-  //------------------------------
   // Notifications Management
-  //------------------------------
-
   func _sendNotification(receiver : Principal, title : Text, message : Text, notifType : Notification.NotificationType, relatedIMEI : ?Text) {
     let notif : Notification = {
       id = 0;
@@ -830,20 +898,19 @@ actor {
     };
   };
 
-  //------------------------------
   // Public Search Functions
-  //------------------------------
-
   public query func checkImei(imei : Text) : async ?PhoneStatus {
-    // Public function - no authorization required
+    // No authorization check - public IMEI check endpoint
     switch (phones.get(imei)) {
       case (?phone) { ?phone.status };
       case (null) { null };
     };
   };
 
-  public query func getAllTheftReports() : async [TheftReport] {
-    // Public function - no authorization required
+  public query ({ caller }) func getAllTheftReports() : async [TheftReport] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view theft reports");
+    };
     theftReports.values().toArray().sort();
   };
 
@@ -856,16 +923,13 @@ actor {
     );
   };
 
-  //------------------------------
   // Access State Check (Safe API)
-  //------------------------------
-
   public query ({ caller }) func hasUserAccess() : async Bool {
+    // No authorization check - any caller can check their own access
     if (AccessControl.hasPermission(accessControlState, caller, #user)) {
       true;
     } else {
       false;
     };
   };
-
 };

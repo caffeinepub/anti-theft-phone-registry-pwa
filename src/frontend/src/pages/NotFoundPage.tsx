@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Home, AlertCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, Home } from "lucide-react";
 
 export default function NotFoundPage() {
   return (

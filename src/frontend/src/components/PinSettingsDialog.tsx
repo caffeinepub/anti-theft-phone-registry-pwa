@@ -1,10 +1,21 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, Lock, AlertCircle } from 'lucide-react';
-import { useSetOrChangePin, useHasPin } from '../hooks/useQueries';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AlertCircle, Loader2, Lock } from "lucide-react";
+import { useState } from "react";
+import {
+  useHasPin,
+  useSetOrChangePin,
+  useValidatePin,
+} from "../hooks/useQueries";
 
 interface PinSettingsDialogProps {
   open: boolean;
@@ -12,71 +23,82 @@ interface PinSettingsDialogProps {
   onPinSetSuccess?: () => void;
 }
 
-export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess }: PinSettingsDialogProps) {
+export default function PinSettingsDialog({
+  open,
+  onOpenChange,
+  onPinSetSuccess,
+}: PinSettingsDialogProps) {
   const { data: hasPin, isLoading: checkingPin } = useHasPin();
   const setOrChangePin = useSetOrChangePin();
+  const validatePin = useValidatePin();
 
-  const [currentPin, setCurrentPin] = useState('');
-  const [newPin, setNewPin] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
-  const [error, setError] = useState('');
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [error, setError] = useState("");
 
   const isChangingPin = hasPin === true;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Validate PIN format
     if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-      setError('PIN must be exactly 4 digits');
+      setError("PIN must be exactly 4 digits");
       return;
     }
 
     // Validate PIN confirmation
     if (newPin !== confirmPin) {
-      setError('PINs do not match');
+      setError("PINs do not match");
       return;
     }
 
-    // If changing PIN, current PIN is required
-    if (isChangingPin && !currentPin) {
-      setError('Current PIN is required');
-      return;
-    }
-
-    setOrChangePin.mutate(
-      {
-        newPin,
-        currentPin: isChangingPin ? currentPin : undefined,
-        onSuccessCallback: onPinSetSuccess,
-      },
-      {
-        onSuccess: () => {
-          setCurrentPin('');
-          setNewPin('');
-          setConfirmPin('');
-          setError('');
-          onOpenChange(false);
-        },
-        onError: () => {
-          // Error is handled by the mutation hook
-        },
+    // If changing PIN, validate current PIN first
+    if (isChangingPin) {
+      if (!currentPin) {
+        setError("Current PIN is required");
+        return;
       }
-    );
+
+      try {
+        await validatePin.mutateAsync(currentPin);
+      } catch (_err) {
+        setError("Current PIN is incorrect");
+        return;
+      }
+    }
+
+    // Set or change the PIN
+    setOrChangePin.mutate(newPin, {
+      onSuccess: () => {
+        setCurrentPin("");
+        setNewPin("");
+        setConfirmPin("");
+        setError("");
+        onOpenChange(false);
+        if (onPinSetSuccess) {
+          onPinSetSuccess();
+        }
+      },
+      onError: () => {
+        // Error is handled by the mutation hook
+      },
+    });
   };
 
   const handleCancel = () => {
-    setCurrentPin('');
-    setNewPin('');
-    setConfirmPin('');
-    setError('');
+    setCurrentPin("");
+    setNewPin("");
+    setConfirmPin("");
+    setError("");
     onOpenChange(false);
   };
 
-  const isFormValid = 
-    newPin.length === 4 && 
-    confirmPin.length === 4 && 
+  const isFormValid =
+    newPin.length === 4 &&
+    confirmPin.length === 4 &&
     newPin === confirmPin &&
     (!isChangingPin || currentPin.length === 4);
 
@@ -86,12 +108,12 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5" />
-            {isChangingPin ? 'Change Security PIN' : 'Set Security PIN'}
+            {isChangingPin ? "Change Security PIN" : "Set Security PIN"}
           </DialogTitle>
           <DialogDescription>
-            {isChangingPin 
-              ? 'Enter your current PIN and choose a new 4-digit PIN to secure phone ownership releases.'
-              : 'Set a 4-digit PIN to secure phone ownership releases. You will need this PIN to release ownership of any phone.'}
+            {isChangingPin
+              ? "Enter your current PIN and choose a new 4-digit PIN to secure phone ownership releases."
+              : "Set a 4-digit PIN to secure phone ownership releases. You will need this PIN to release ownership of any phone."}
           </DialogDescription>
         </DialogHeader>
 
@@ -110,7 +132,9 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
                   inputMode="numeric"
                   placeholder="Enter current 4-digit PIN"
                   value={currentPin}
-                  onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  onChange={(e) =>
+                    setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                  }
                   maxLength={4}
                   className="font-mono text-center text-lg tracking-widest"
                   autoComplete="off"
@@ -126,7 +150,9 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
                 inputMode="numeric"
                 placeholder="Enter 4-digit PIN"
                 value={newPin}
-                onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onChange={(e) =>
+                  setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
                 maxLength={4}
                 className="font-mono text-center text-lg tracking-widest"
                 autoComplete="off"
@@ -141,7 +167,9 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
                 inputMode="numeric"
                 placeholder="Re-enter 4-digit PIN"
                 value={confirmPin}
-                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onChange={(e) =>
+                  setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
                 maxLength={4}
                 className="font-mono text-center text-lg tracking-widest"
                 autoComplete="off"
@@ -158,7 +186,8 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
             <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100">
               <p className="font-semibold">Security Notice:</p>
               <p className="mt-1">
-                This PIN will be required whenever you want to release ownership of a phone. Keep it secure and memorable.
+                This PIN will be required whenever you want to release ownership
+                of a phone. Keep it secure and memorable.
               </p>
             </div>
 
@@ -167,21 +196,27 @@ export default function PinSettingsDialog({ open, onOpenChange, onPinSetSuccess 
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                disabled={setOrChangePin.isPending}
+                disabled={setOrChangePin.isPending || validatePin.isPending}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={!isFormValid || setOrChangePin.isPending}
+                disabled={
+                  !isFormValid ||
+                  setOrChangePin.isPending ||
+                  validatePin.isPending
+                }
               >
-                {setOrChangePin.isPending ? (
+                {setOrChangePin.isPending || validatePin.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
+                ) : isChangingPin ? (
+                  "Change PIN"
                 ) : (
-                  isChangingPin ? 'Change PIN' : 'Set PIN'
+                  "Set PIN"
                 )}
               </Button>
             </DialogFooter>

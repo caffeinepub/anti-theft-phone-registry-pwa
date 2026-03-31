@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { useReportFound } from '../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle, Loader2, Smartphone } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, Loader2, Smartphone } from "lucide-react";
+import { useState } from "react";
+import { useReportFound } from "../hooks/useQueries";
 
 export default function ReportFoundPage() {
   const reportFound = useReportFound();
 
-  const [imei, setImei] = useState('');
-  const [finderInfo, setFinderInfo] = useState('');
+  const [imei, setImei] = useState("");
+  const [finderInfo, setFinderInfo] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +23,10 @@ export default function ReportFoundPage() {
         },
         {
           onSuccess: () => {
-            setImei('');
-            setFinderInfo('');
+            setImei("");
+            setFinderInfo("");
           },
-        }
+        },
       );
     }
   };
@@ -40,7 +40,9 @@ export default function ReportFoundPage() {
             <CheckCircle className="h-8 w-8" />
             <div>
               <h1 className="text-2xl font-bold">Lapor Ponsel Ditemukan</h1>
-              <p className="mt-1 text-sm text-green-100">Bantu pemilik menemukan ponsel mereka</p>
+              <p className="mt-1 text-sm text-green-100">
+                Bantu pemilik menemukan ponsel mereka
+              </p>
             </div>
           </div>
         </div>
@@ -52,7 +54,8 @@ export default function ReportFoundPage() {
           <CardHeader>
             <CardTitle>Laporkan Ponsel yang Ditemukan</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Jika Anda menemukan ponsel yang hilang, laporkan di sini untuk membantu pemiliknya
+              Jika Anda menemukan ponsel yang hilang, laporkan di sini untuk
+              membantu pemiliknya
             </p>
           </CardHeader>
           <CardContent>
@@ -75,12 +78,15 @@ export default function ReportFoundPage() {
                   />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  IMEI dapat ditemukan di pengaturan ponsel atau di belakang baterai
+                  IMEI dapat ditemukan di pengaturan ponsel atau di belakang
+                  baterai
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="finderInfo">Informasi Kontak Penemuan (Opsional)</Label>
+                <Label htmlFor="finderInfo">
+                  Informasi Kontak Penemuan (Opsional)
+                </Label>
                 <Textarea
                   id="finderInfo"
                   value={finderInfo}
@@ -90,7 +96,8 @@ export default function ReportFoundPage() {
                   className="mt-1"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Informasi ini akan dikirim ke pemilik ponsel untuk memudahkan koordinasi
+                  Informasi ini akan dikirim ke pemilik ponsel untuk memudahkan
+                  koordinasi
                 </p>
               </div>
 
@@ -98,7 +105,9 @@ export default function ReportFoundPage() {
                 <div className="flex gap-3">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
                   <div className="text-sm text-green-800 dark:text-green-200">
-                    <p className="font-medium">Apa yang terjadi setelah laporan?</p>
+                    <p className="font-medium">
+                      Apa yang terjadi setelah laporan?
+                    </p>
                     <ul className="mt-2 list-inside list-disc space-y-1">
                       <li>Status ponsel akan diubah menjadi "Aktif"</li>
                       <li>Pemilik akan menerima notifikasi otomatis</li>

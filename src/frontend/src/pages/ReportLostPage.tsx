@@ -1,30 +1,38 @@
-import { useState, useEffect } from 'react';
-import { useGetUserPhones, useReportLostStolen } from '../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertTriangle, Loader2, MapPin } from 'lucide-react';
-import { PhoneStatus } from '../backend';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertTriangle, Loader2, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PhoneStatus } from "../backend";
+import { useGetUserPhones, useReportLostStolen } from "../hooks/useQueries";
 
 export default function ReportLostPage() {
   const { data: phones = [], isLoading } = useGetUserPhones();
   const reportLostStolen = useReportLostStolen();
 
-  const [selectedImei, setSelectedImei] = useState('');
-  const [reportType, setReportType] = useState<'lost' | 'stolen'>('lost');
-  const [location, setLocation] = useState('');
-  const [details, setDetails] = useState('');
+  const [selectedImei, setSelectedImei] = useState("");
+  const [reportType, setReportType] = useState<"lost" | "stolen">("lost");
+  const [location, setLocation] = useState("");
+  const [details, setDetails] = useState("");
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Filter only active phones
-  const activePhones = phones.filter((phone) => phone.status === PhoneStatus.active);
+  const activePhones = phones.filter(
+    (phone) => phone.status === PhoneStatus.active,
+  );
 
   const getLocation = () => {
     setIsGettingLocation(true);
-    if ('geolocation' in navigator) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -32,13 +40,13 @@ export default function ReportLostPage() {
           setIsGettingLocation(false);
         },
         (error) => {
-          console.error('Error getting location:', error);
-          setLocation('Lokasi tidak tersedia');
+          console.error("Error getting location:", error);
+          setLocation("Lokasi tidak tersedia");
           setIsGettingLocation(false);
-        }
+        },
       );
     } else {
-      setLocation('Geolocation tidak didukung');
+      setLocation("Geolocation tidak didukung");
       setIsGettingLocation(false);
     }
   };
@@ -55,15 +63,15 @@ export default function ReportLostPage() {
           imei: selectedImei,
           location,
           details,
-          isStolen: reportType === 'stolen',
+          isStolen: reportType === "stolen",
         },
         {
           onSuccess: () => {
-            setSelectedImei('');
-            setDetails('');
-            setReportType('lost');
+            setSelectedImei("");
+            setDetails("");
+            setReportType("lost");
           },
-        }
+        },
       );
     }
   };
@@ -77,7 +85,9 @@ export default function ReportLostPage() {
             <AlertTriangle className="h-8 w-8" />
             <div>
               <h1 className="text-2xl font-bold">Laporkan Kehilangan</h1>
-              <p className="mt-1 text-sm text-red-100">Laporkan ponsel hilang atau dicuri</p>
+              <p className="mt-1 text-sm text-red-100">
+                Laporkan ponsel hilang atau dicuri
+              </p>
             </div>
           </div>
         </div>
@@ -88,8 +98,8 @@ export default function ReportLostPage() {
         {isLoading ? (
           <Card className="animate-pulse">
             <CardContent className="p-6">
-              <div className="h-4 w-3/4 rounded bg-muted"></div>
-              <div className="mt-2 h-3 w-1/2 rounded bg-muted"></div>
+              <div className="h-4 w-3/4 rounded bg-muted" />
+              <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
             </CardContent>
           </Card>
         ) : activePhones.length === 0 ? (
@@ -131,7 +141,9 @@ export default function ReportLostPage() {
                   <Label>Jenis Laporan</Label>
                   <RadioGroup
                     value={reportType}
-                    onValueChange={(value) => setReportType(value as 'lost' | 'stolen')}
+                    onValueChange={(value) =>
+                      setReportType(value as "lost" | "stolen")
+                    }
                     className="mt-2"
                   >
                     <div className="flex items-center space-x-2">
@@ -198,7 +210,12 @@ export default function ReportLostPage() {
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
-                  disabled={reportLostStolen.isPending || !selectedImei || !location || !details}
+                  disabled={
+                    reportLostStolen.isPending ||
+                    !selectedImei ||
+                    !location ||
+                    !details
+                  }
                 >
                   {reportLostStolen.isPending ? (
                     <>

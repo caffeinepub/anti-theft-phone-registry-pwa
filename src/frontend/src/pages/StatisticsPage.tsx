@@ -1,10 +1,32 @@
-import { useGetStatistics } from '../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { Smartphone, AlertTriangle, ShieldCheck, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertCircle,
+  AlertTriangle,
+  Loader2,
+  ShieldCheck,
+  Smartphone,
+  TrendingUp,
+} from "lucide-react";
+import {
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { useGetStatistics } from "../hooks/useQueries";
 
 export default function StatisticsPage() {
   const { data: statistics, isLoading, isError, error } = useGetStatistics();
@@ -23,9 +45,9 @@ export default function StatisticsPage() {
                   Memuat data statistik...
                 </p>
               </div>
-              <img 
-                src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png" 
-                alt="Statistics Icon" 
+              <img
+                src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png"
+                alt="Statistics Icon"
                 className="h-12 w-12"
               />
             </div>
@@ -79,11 +101,13 @@ export default function StatisticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold">Laporan Statistik</h1>
-                <p className="mt-1 text-sm text-blue-100">Terjadi kesalahan saat memuat data</p>
+                <p className="mt-1 text-sm text-blue-100">
+                  Terjadi kesalahan saat memuat data
+                </p>
               </div>
-              <img 
-                src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png" 
-                alt="Statistics Icon" 
+              <img
+                src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png"
+                alt="Statistics Icon"
                 className="h-12 w-12"
               />
             </div>
@@ -94,7 +118,8 @@ export default function StatisticsPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Gagal Memuat Data Statistik</AlertTitle>
             <AlertDescription>
-              Terjadi kesalahan saat mengambil data statistik. Silakan coba lagi nanti.
+              Terjadi kesalahan saat mengambil data statistik. Silakan coba lagi
+              nanti.
               {error && <div className="mt-2 text-sm">{String(error)}</div>}
             </AlertDescription>
           </Alert>
@@ -104,36 +129,60 @@ export default function StatisticsPage() {
   }
 
   // Safe data extraction with explicit fallbacks
-  const totalPhones = statistics?.totalPhones ? Number(statistics.totalPhones) : 0;
-  const activePhones = statistics?.activePhones !== undefined ? Number(statistics.activePhones) : 0;
+  const totalPhones = statistics?.totalPhones
+    ? Number(statistics.totalPhones)
+    : 0;
+  const activePhones =
+    statistics?.activePhones !== undefined
+      ? Number(statistics.activePhones)
+      : 0;
   const lostPhones = statistics?.lostPhones ? Number(statistics.lostPhones) : 0;
-  const stolenPhones = statistics?.stolenPhones ? Number(statistics.stolenPhones) : 0;
-  const totalReports = statistics?.theftReportStats?.total ? Number(statistics.theftReportStats.total) : 0;
+  const stolenPhones = statistics?.stolenPhones
+    ? Number(statistics.stolenPhones)
+    : 0;
+  const totalReports = statistics?.theftReportStats?.total
+    ? Number(statistics.theftReportStats.total)
+    : 0;
 
   // Prepare status data for pie chart - only include categories with values > 0 or show all if total > 0
   const statusData = [
-    { name: 'Aktif', value: activePhones, color: 'hsl(142, 76%, 36%)' }, // Green
-    { name: 'Hilang', value: lostPhones, color: 'hsl(38, 92%, 50%)' }, // Orange
-    { name: 'Dicuri', value: stolenPhones, color: 'hsl(0, 84%, 60%)' }, // Red
-  ].filter(item => item.value > 0); // Only show non-zero values in chart
+    { name: "Aktif", value: activePhones, color: "hsl(142, 76%, 36%)" }, // Green
+    { name: "Hilang", value: lostPhones, color: "hsl(38, 92%, 50%)" }, // Orange
+    { name: "Dicuri", value: stolenPhones, color: "hsl(0, 84%, 60%)" }, // Red
+  ].filter((item) => item.value > 0); // Only show non-zero values in chart
 
   // Check if there's any data to display
   const hasPhoneData = totalPhones > 0;
   const hasReportData = totalReports > 0;
 
   // Prepare monthly data with safe defaults
-  const monthNames = ['12 bln lalu', '11 bln lalu', '10 bln lalu', '9 bln lalu', '8 bln lalu', '7 bln lalu', '6 bln lalu', '5 bln lalu', '4 bln lalu', '3 bln lalu', '2 bln lalu', 'Bulan lalu'];
-  const monthlyData = statistics?.theftReportStats?.monthly 
-    ? statistics.theftReportStats.monthly.map((count, index) => ({
-        month: monthNames[index] || `Bulan ${index + 1}`,
-        laporan: Number(count),
-      })).reverse()
+  const monthNames = [
+    "12 bln lalu",
+    "11 bln lalu",
+    "10 bln lalu",
+    "9 bln lalu",
+    "8 bln lalu",
+    "7 bln lalu",
+    "6 bln lalu",
+    "5 bln lalu",
+    "4 bln lalu",
+    "3 bln lalu",
+    "2 bln lalu",
+    "Bulan lalu",
+  ];
+  const monthlyData = statistics?.theftReportStats?.monthly
+    ? statistics.theftReportStats.monthly
+        .map((count, index) => ({
+          month: monthNames[index] || `Bulan ${index + 1}`,
+          laporan: Number(count),
+        }))
+        .reverse()
     : monthNames.map((month) => ({ month, laporan: 0 })).reverse();
 
   const chartConfig = {
     laporan: {
-      label: 'Laporan',
-      color: 'hsl(var(--chart-1))',
+      label: "Laporan",
+      color: "hsl(var(--chart-1))",
     },
   };
 
@@ -145,11 +194,13 @@ export default function StatisticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">Laporan Statistik</h1>
-              <p className="mt-1 text-sm text-blue-100">Data dan analisis sistem</p>
+              <p className="mt-1 text-sm text-blue-100">
+                Data dan analisis sistem
+              </p>
             </div>
-            <img 
-              src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png" 
-              alt="Statistics Icon" 
+            <img
+              src="/assets/generated/statistics-chart-icon-transparent.dim_64x64.png"
+              alt="Statistics Icon"
               className="h-12 w-12"
             />
           </div>
@@ -164,8 +215,8 @@ export default function StatisticsPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Belum Ada Data</AlertTitle>
             <AlertDescription>
-              Belum ada ponsel yang terdaftar atau laporan yang dibuat dalam sistem. 
-              Data statistik akan muncul setelah ada aktivitas pengguna.
+              Belum ada ponsel yang terdaftar atau laporan yang dibuat dalam
+              sistem. Data statistik akan muncul setelah ada aktivitas pengguna.
             </AlertDescription>
           </Alert>
         )}
@@ -180,8 +231,12 @@ export default function StatisticsPage() {
                   <Smartphone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Ponsel</p>
-                  <p className="text-2xl font-bold text-foreground">{totalPhones}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Ponsel
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalPhones}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -195,8 +250,12 @@ export default function StatisticsPage() {
                   <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Ponsel Aktif</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{activePhones}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Ponsel Aktif
+                  </p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {activePhones}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -210,8 +269,12 @@ export default function StatisticsPage() {
                   <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Ponsel Hilang</p>
-                  <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{lostPhones}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Ponsel Hilang
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    {lostPhones}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -225,8 +288,12 @@ export default function StatisticsPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Ponsel Dicuri</p>
-                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stolenPhones}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Ponsel Dicuri
+                  </p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {stolenPhones}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -251,7 +318,9 @@ export default function StatisticsPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, value, percent }) =>
+                        `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -261,7 +330,7 @@ export default function StatisticsPage() {
                       ))}
                     </Pie>
                     <Legend />
-                    <ChartTooltip 
+                    <ChartTooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
@@ -287,8 +356,12 @@ export default function StatisticsPage() {
               <div className="flex h-64 items-center justify-center text-center">
                 <div className="text-muted-foreground">
                   <Smartphone className="mx-auto mb-2 h-12 w-12 opacity-50" />
-                  <p className="text-sm">Belum ada data ponsel untuk ditampilkan</p>
-                  <p className="mt-1 text-xs">Grafik akan muncul setelah ada ponsel terdaftar</p>
+                  <p className="text-sm">
+                    Belum ada data ponsel untuk ditampilkan
+                  </p>
+                  <p className="mt-1 text-xs">
+                    Grafik akan muncul setelah ada ponsel terdaftar
+                  </p>
                 </div>
               </div>
             )}
@@ -308,8 +381,8 @@ export default function StatisticsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
+                  <XAxis
+                    dataKey="month"
                     tick={{ fontSize: 10 }}
                     angle={-45}
                     textAnchor="end"
@@ -317,12 +390,12 @@ export default function StatisticsPage() {
                   />
                   <YAxis allowDecimals={false} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="laporan" 
-                    stroke="hsl(var(--chart-1))" 
+                  <Line
+                    type="monotone"
+                    dataKey="laporan"
+                    stroke="hsl(var(--chart-1))"
                     strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--chart-1))' }}
+                    dot={{ fill: "hsl(var(--chart-1))" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -330,7 +403,8 @@ export default function StatisticsPage() {
             {!hasReportData && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Belum ada laporan kehilangan atau pencurian dalam 12 bulan terakhir
+                  Belum ada laporan kehilangan atau pencurian dalam 12 bulan
+                  terakhir
                 </p>
               </div>
             )}
@@ -341,12 +415,16 @@ export default function StatisticsPage() {
         <Card className="mt-6 shadow-md">
           <CardContent className="p-6">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">Total Laporan Kehilangan & Pencurian</p>
+              <p className="text-sm text-muted-foreground">
+                Total Laporan Kehilangan & Pencurian
+              </p>
               <p className="mt-2 text-4xl font-bold text-foreground">
                 {totalReports}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {totalReports > 0 ? 'Sejak sistem diluncurkan' : 'Belum ada laporan'}
+                {totalReports > 0
+                  ? "Sejak sistem diluncurkan"
+                  : "Belum ada laporan"}
               </p>
             </div>
           </CardContent>

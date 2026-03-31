@@ -47,6 +47,15 @@ export interface Phone {
     imei: string;
     brand: string;
 }
+export interface ActivationTokenInfo {
+    status: TokenStatus;
+    token: string;
+    usedAt?: Time;
+    createdAt: Time;
+    createdBy: Principal;
+    createdFor: Principal;
+    isUsed: boolean;
+}
 export interface InviteCodeWithStatus {
     created: Time;
     code: string;
@@ -116,6 +125,12 @@ export enum PhoneStatus {
     active = "active",
     lost = "lost"
 }
+export enum TokenStatus {
+    revoked = "revoked",
+    expired = "expired",
+    used = "used",
+    unused = "unused"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -125,10 +140,13 @@ export interface backendInterface {
     addPhone(imei: string, brand: string, model: string, pin: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     checkImei(imei: string): Promise<PhoneStatus | null>;
+    checkUserActivationStatus(): Promise<boolean>;
     clearPin(): Promise<void>;
     deactivateInviteCode(inviteCode: string): Promise<void>;
+    generateActivationToken(targetUser: Principal): Promise<string>;
     generateInviteCode(): Promise<string>;
     getAccessState(): Promise<AccessState>;
+    getActivationTokenHistory(): Promise<Array<ActivationTokenInfo>>;
     getAllRSVPs(): Promise<Array<RSVP>>;
     getAllTheftReports(): Promise<Array<TheftReport>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -145,6 +163,7 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     markAllNotificationsAsRead(): Promise<void>;
     markNotificationAsRead(notificationId: bigint): Promise<void>;
+    redeemActivationToken(token: string): Promise<void>;
     redeemInviteCode(inviteCode: string): Promise<void>;
     registerProfile(email: string, city: string): Promise<void>;
     releasePhone(imei: string, pin: string, reason: ReleaseOwnershipReason): Promise<void>;
@@ -153,6 +172,6 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setOrChangePin(newPin: string): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
-    transferOwnership(imei: string, newOwner: Principal): Promise<void>;
+    transferOwnership(imei: string, newOwner: Principal, pin: string): Promise<void>;
     validatePin(pin: string): Promise<void>;
 }

@@ -1,16 +1,19 @@
-import { useEffect } from 'react';
-import { X, CheckCircle, Info, AlertTriangle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import type { Notification } from '../backend';
-import { NotificationType } from '../backend';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle, CheckCircle, Info, X } from "lucide-react";
+import { useEffect } from "react";
+import type { Notification } from "../backend";
+import { NotificationType } from "../backend";
 
 interface NotificationPopupProps {
   notification: Notification;
   onClose: () => void;
 }
 
-export default function NotificationPopup({ notification, onClose }: NotificationPopupProps) {
+export default function NotificationPopup({
+  notification,
+  onClose,
+}: NotificationPopupProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -35,13 +38,13 @@ export default function NotificationPopup({ notification, onClose }: Notificatio
   const getBorderColor = () => {
     switch (notification.notifType) {
       case NotificationType.success:
-        return 'border-l-green-500';
+        return "border-l-green-500";
       case NotificationType.info:
-        return 'border-l-blue-500';
+        return "border-l-blue-500";
       case NotificationType.warning:
-        return 'border-l-orange-500';
+        return "border-l-orange-500";
       default:
-        return 'border-l-blue-500';
+        return "border-l-blue-500";
     }
   };
 
@@ -52,10 +55,16 @@ export default function NotificationPopup({ notification, onClose }: Notificatio
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">{getIcon()}</div>
             <div className="flex-1">
-              <h4 className="font-semibold text-foreground">{notification.title}</h4>
-              <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+              <h4 className="font-semibold text-foreground">
+                {notification.title}
+              </h4>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {notification.message}
+              </p>
               {notification.relatedIMEI && (
-                <p className="mt-2 text-xs text-muted-foreground">IMEI: {notification.relatedIMEI}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  IMEI: {notification.relatedIMEI}
+                </p>
               )}
             </div>
             <Button

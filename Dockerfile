@@ -74,7 +74,7 @@ ENV PATH="/home/ubuntu/.cargo/bin:${PATH}"
 # Install Motoko compiler
 RUN <<EOF
 set -e
-MOTOKO_VERSION=0.16.3-implicits-26
+MOTOKO_VERSION=1.2.0
 case ${TARGETARCH:-$(uname -m)} in
     amd64|x86_64)
         COMPILER_TARBALL="motoko-Linux-x86_64-${MOTOKO_VERSION}.tar.gz"
@@ -98,7 +98,7 @@ EOF
 # Install Motoko core library
 RUN <<EOF
 set -e
-CORE_LIB_VERSION=implicits-20
+CORE_LIB_VERSION=moc-1.2.0
 CORE_LIB_INSTALL_DIR="$HOME/.motoko/core/$CORE_LIB_VERSION"
 mkdir -p "$CORE_LIB_INSTALL_DIR"
 CORE_LIB_URL="https://github.com/caffeinelabs/motoko-core/archive/refs/tags/${CORE_LIB_VERSION}.tar.gz"
@@ -109,7 +109,7 @@ EOF
 # Install Motoko base library
 RUN <<EOF
 set -e
-BASE_LIB_VERSION=0.16.1
+BASE_LIB_VERSION=SKIP
 BASE_LIB_INSTALL_DIR="$HOME/.motoko/base/$BASE_LIB_VERSION"
 mkdir -p "$BASE_LIB_INSTALL_DIR"
 BASE_LIB_URL="https://github.com/caffeinelabs/motoko-base/archive/refs/tags/moc-${BASE_LIB_VERSION}.tar.gz"
@@ -118,9 +118,9 @@ curl -L "$BASE_LIB_URL" | tar -xz --strip-components=2 -C "$BASE_LIB_INSTALL_DIR
 EOF
 
 # Set Motoko environment variables for deploy.sh and other scripts
-ENV MOC_PATH="/home/ubuntu/.motoko/moc/0.16.3-implicits-26/bin/moc"
-ENV MOTOKO_CORE="/home/ubuntu/.motoko/core/implicits-20"
-ENV MOTOKO_BASE="/home/ubuntu/.motoko/base/0.16.1"
+ENV MOC_PATH="/home/ubuntu/.motoko/moc/1.2.0/bin/moc"
+ENV MOTOKO_CORE="/home/ubuntu/.motoko/core/moc-1.2.0"
+ENV MOTOKO_BASE="/home/ubuntu/.motoko/base/SKIP"
 
 WORKDIR /workdir
 

@@ -1,15 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, Package, AlertTriangle, CheckCircle, UserCheck, FileText, Trash2, RefreshCw } from 'lucide-react';
-import type { IMEIEvent, EventType } from '../backend';
-import { EventType as EventTypeEnum } from '../backend';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  FileText,
+  Package,
+  RefreshCw,
+  Trash2,
+  UserCheck,
+} from "lucide-react";
+import type { EventType, IMEIEvent } from "../backend";
+import { EventType as EventTypeEnum } from "../backend";
 
 interface ImeiHistoryTimelineProps {
   events: IMEIEvent[];
   isLoading?: boolean;
 }
 
-export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTimelineProps) {
+export default function ImeiHistoryTimeline({
+  events,
+  isLoading,
+}: ImeiHistoryTimelineProps) {
   const getEventIcon = (eventType: EventType) => {
     switch (eventType) {
       case EventTypeEnum.registered:
@@ -34,48 +46,50 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
   const getEventLabel = (eventType: EventType) => {
     switch (eventType) {
       case EventTypeEnum.registered:
-        return 'Phone Registered';
+        return "Phone Registered";
       case EventTypeEnum.lostReported:
-        return 'Reported Lost';
+        return "Reported Lost";
       case EventTypeEnum.stolenReported:
-        return 'Reported Stolen';
+        return "Reported Stolen";
       case EventTypeEnum.foundReported:
-        return 'Reported Found';
+        return "Reported Found";
       case EventTypeEnum.ownershipTransferred:
-        return 'Ownership Transferred';
+        return "Ownership Transferred";
       case EventTypeEnum.ownershipReleased:
-        return 'Ownership Released';
+        return "Ownership Released";
       case EventTypeEnum.reRegistered:
-        return 'Re-registered';
+        return "Re-registered";
       default:
-        return 'Event';
+        return "Event";
     }
   };
 
-  const getEventBadgeVariant = (eventType: EventType): "default" | "secondary" | "destructive" | "outline" => {
+  const getEventBadgeVariant = (
+    eventType: EventType,
+  ): "default" | "secondary" | "destructive" | "outline" => {
     switch (eventType) {
       case EventTypeEnum.registered:
       case EventTypeEnum.foundReported:
       case EventTypeEnum.reRegistered:
-        return 'default';
+        return "default";
       case EventTypeEnum.lostReported:
       case EventTypeEnum.ownershipReleased:
-        return 'secondary';
+        return "secondary";
       case EventTypeEnum.stolenReported:
-        return 'destructive';
+        return "destructive";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
   const formatTimestamp = (timestamp: bigint) => {
     const date = new Date(Number(timestamp / BigInt(1000000)));
-    return date.toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -84,7 +98,7 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
     (event) =>
       event.eventType === EventTypeEnum.ownershipTransferred ||
       event.eventType === EventTypeEnum.ownershipReleased ||
-      event.eventType === EventTypeEnum.reRegistered
+      event.eventType === EventTypeEnum.reRegistered,
   ).length;
 
   if (isLoading) {
@@ -100,10 +114,10 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex gap-4 animate-pulse">
-                <div className="h-10 w-10 rounded-full bg-muted"></div>
+                <div className="h-10 w-10 rounded-full bg-muted" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/3 rounded bg-muted"></div>
-                  <div className="h-3 w-2/3 rounded bg-muted"></div>
+                  <div className="h-4 w-1/3 rounded bg-muted" />
+                  <div className="h-3 w-2/3 rounded bg-muted" />
                 </div>
               </div>
             ))}
@@ -146,7 +160,7 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
           </CardTitle>
           {handOffCount > 0 && (
             <Badge variant="outline" className="text-sm">
-              {handOffCount} {handOffCount === 1 ? 'Hand-off' : 'Hand-offs'}
+              {handOffCount} {handOffCount === 1 ? "Hand-off" : "Hand-offs"}
             </Badge>
           )}
         </div>
@@ -160,19 +174,26 @@ export default function ImeiHistoryTimeline({ events, isLoading }: ImeiHistoryTi
                   {getEventIcon(event.eventType)}
                 </div>
                 {index < sortedEvents.length - 1 && (
-                  <div className="w-0.5 flex-1 bg-border mt-2"></div>
+                  <div className="w-0.5 flex-1 bg-border mt-2" />
                 )}
               </div>
               <div className="flex-1 pb-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-semibold text-sm">{getEventLabel(event.eventType)}</p>
-                      <Badge variant={getEventBadgeVariant(event.eventType)} className="text-xs">
+                      <p className="font-semibold text-sm">
+                        {getEventLabel(event.eventType)}
+                      </p>
+                      <Badge
+                        variant={getEventBadgeVariant(event.eventType)}
+                        className="text-xs"
+                      >
                         {getEventLabel(event.eventType)}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{event.details}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {event.details}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {formatTimestamp(event.timestamp)}

@@ -1,20 +1,25 @@
-import { useState } from 'react';
-import { useCheckImei, useGetIMEIHistory } from '../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Search, Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { PhoneStatus } from '../backend';
-import ImeiHistoryTimeline from '../components/ImeiHistoryTimeline';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AlertTriangle, CheckCircle2, Search, Shield } from "lucide-react";
+import { useState } from "react";
+import { PhoneStatus } from "../backend";
+import ImeiHistoryTimeline from "../components/ImeiHistoryTimeline";
+import { useCheckImei, useGetIMEIHistory } from "../hooks/useQueries";
 
 export default function CheckImeiPage() {
-  const [imeiInput, setImeiInput] = useState('');
-  const [searchImei, setSearchImei] = useState('');
+  const [imeiInput, setImeiInput] = useState("");
+  const [searchImei, setSearchImei] = useState("");
 
-  const { data: status, isLoading: statusLoading, isFetched: statusFetched } = useCheckImei(searchImei);
-  const { data: history = [], isLoading: historyLoading } = useGetIMEIHistory(searchImei);
+  const {
+    data: status,
+    isLoading: statusLoading,
+    isFetched: statusFetched,
+  } = useCheckImei(searchImei);
+  const { data: history = [], isLoading: historyLoading } =
+    useGetIMEIHistory(searchImei);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +36,9 @@ export default function CheckImeiPage() {
         <Card className="border-2 border-blue-500 shadow-lg">
           <CardContent className="flex flex-col items-center py-12">
             <Shield className="mb-4 h-16 w-16 text-blue-600" />
-            <h3 className="mb-2 text-xl font-bold text-foreground">Ponsel Aman</h3>
+            <h3 className="mb-2 text-xl font-bold text-foreground">
+              Ponsel Aman
+            </h3>
             <p className="text-center text-muted-foreground">
               IMEI ini tidak terdaftar dalam sistem kami
             </p>
@@ -46,7 +53,9 @@ export default function CheckImeiPage() {
         <Card className="border-2 border-green-500 shadow-lg">
           <CardContent className="flex flex-col items-center py-12">
             <CheckCircle2 className="mb-4 h-16 w-16 text-green-600" />
-            <h3 className="mb-2 text-xl font-bold text-foreground">Ponsel Terdaftar</h3>
+            <h3 className="mb-2 text-xl font-bold text-foreground">
+              Ponsel Terdaftar
+            </h3>
             <p className="text-center text-muted-foreground">
               Ponsel ini terdaftar dan dalam status aktif
             </p>
@@ -61,16 +70,22 @@ export default function CheckImeiPage() {
         <Card className="border-2 border-red-500 shadow-lg">
           <CardContent className="flex flex-col items-center py-12">
             <AlertTriangle className="mb-4 h-16 w-16 text-red-600" />
-            <h3 className="mb-2 text-xl font-bold text-foreground">⚠️ PERINGATAN!</h3>
+            <h3 className="mb-2 text-xl font-bold text-foreground">
+              ⚠️ PERINGATAN!
+            </h3>
             <p className="text-center text-muted-foreground">
-              Ponsel ini telah dilaporkan {status === PhoneStatus.stolen ? 'dicuri' : 'hilang'}
+              Ponsel ini telah dilaporkan{" "}
+              {status === PhoneStatus.stolen ? "dicuri" : "hilang"}
             </p>
             <Badge variant="destructive" className="mt-4">
-              {status === PhoneStatus.stolen ? 'Dilaporkan Dicuri' : 'Dilaporkan Hilang'}
+              {status === PhoneStatus.stolen
+                ? "Dilaporkan Dicuri"
+                : "Dilaporkan Hilang"}
             </Badge>
             <div className="mt-6 rounded-lg bg-red-50 p-4 dark:bg-red-950">
               <p className="text-center text-sm text-red-800 dark:text-red-200">
-                <strong>Jangan membeli ponsel ini!</strong> Hubungi pihak berwenang jika Anda menemukan ponsel ini dijual.
+                <strong>Jangan membeli ponsel ini!</strong> Hubungi pihak
+                berwenang jika Anda menemukan ponsel ini dijual.
               </p>
             </div>
           </CardContent>
@@ -90,7 +105,9 @@ export default function CheckImeiPage() {
             <Search className="h-8 w-8" />
             <div>
               <h1 className="text-2xl font-bold">Cek Status IMEI</h1>
-              <p className="mt-1 text-sm text-green-100">Periksa status ponsel sebelum membeli</p>
+              <p className="mt-1 text-sm text-green-100">
+                Periksa status ponsel sebelum membeli
+              </p>
             </div>
           </div>
         </div>
@@ -110,7 +127,9 @@ export default function CheckImeiPage() {
                 <Input
                   id="imei"
                   value={imeiInput}
-                  onChange={(e) => setImeiInput(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) =>
+                    setImeiInput(e.target.value.replace(/\D/g, ""))
+                  }
                   placeholder="Masukkan 15 digit IMEI"
                   maxLength={15}
                   required
@@ -142,8 +161,9 @@ export default function CheckImeiPage() {
                   Mengapa Cek IMEI Penting?
                 </h3>
                 <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">
-                  Sebelum membeli ponsel bekas, pastikan ponsel tersebut tidak dalam status hilang atau dicuri. 
-                  Cek IMEI membantu Anda menghindari pembelian barang curian.
+                  Sebelum membeli ponsel bekas, pastikan ponsel tersebut tidak
+                  dalam status hilang atau dicuri. Cek IMEI membantu Anda
+                  menghindari pembelian barang curian.
                 </p>
               </div>
             </div>
@@ -154,18 +174,21 @@ export default function CheckImeiPage() {
         {statusLoading ? (
           <Card className="animate-pulse mb-6">
             <CardContent className="py-12">
-              <div className="mx-auto h-16 w-16 rounded-full bg-muted"></div>
-              <div className="mx-auto mt-4 h-4 w-48 rounded bg-muted"></div>
+              <div className="mx-auto h-16 w-16 rounded-full bg-muted" />
+              <div className="mx-auto mt-4 h-4 w-48 rounded bg-muted" />
             </CardContent>
           </Card>
         ) : (
           <>
             {renderResult()}
-            
+
             {/* IMEI History Timeline */}
             {searchImei && statusFetched && (
               <div className="mt-6">
-                <ImeiHistoryTimeline events={history} isLoading={historyLoading} />
+                <ImeiHistoryTimeline
+                  events={history}
+                  isLoading={historyLoading}
+                />
               </div>
             )}
           </>

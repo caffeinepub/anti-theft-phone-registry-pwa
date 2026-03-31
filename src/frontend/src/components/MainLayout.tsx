@@ -1,16 +1,28 @@
-import { Outlet, Link, useLocation } from '@tanstack/react-router';
-import { Home, Smartphone, AlertTriangle, Search, Bell, BarChart3, Info, User, Shield } from 'lucide-react';
-import { useGetNotifications, useIsCurrentUserAdmin } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { Badge } from '@/components/ui/badge';
-import LanguageSwitcher from './LanguageSwitcher';
-import { useTranslation } from '../i18n/useTranslation';
+import { Badge } from "@/components/ui/badge";
+import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  AlertTriangle,
+  BarChart3,
+  Bell,
+  CheckCircle,
+  Home,
+  Info,
+  Search,
+  Shield,
+  Smartphone,
+  User,
+} from "lucide-react";
+import {
+  useGetNotifications,
+  useIsCurrentUserAdmin,
+} from "../hooks/useQueries";
+import { useTranslation } from "../i18n/useTranslation";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function MainLayout() {
   const location = useLocation();
-  const { identity } = useInternetIdentity();
   const { data: isAdmin } = useIsCurrentUserAdmin();
-  const { data: notifications = [] } = useGetNotifications(identity?.getPrincipal());
+  const { data: notifications = [] } = useGetNotifications();
   const { t } = useTranslation();
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -18,19 +30,25 @@ export default function MainLayout() {
   const isActive = (path: string) => location.pathname === path;
 
   const tabs = [
-    { path: '/', icon: Home, label: t('tabs.home') },
-    { path: '/phones', icon: Smartphone, label: t('tabs.phones') },
-    { path: '/report-lost', icon: AlertTriangle, label: t('tabs.report') },
-    { path: '/check', icon: Search, label: t('tabs.check') },
-    { path: '/notifications', icon: Bell, label: t('tabs.notifications'), badge: unreadCount },
-    { path: '/statistics', icon: BarChart3, label: t('tabs.statistics') },
-    { path: '/about', icon: Info, label: t('tabs.about') },
-    { path: '/profile', icon: User, label: t('tabs.profile') },
+    { path: "/", icon: Home, label: t("tabs.home") },
+    { path: "/phones", icon: Smartphone, label: t("tabs.phones") },
+    { path: "/report-lost", icon: AlertTriangle, label: t("tabs.reportLost") },
+    { path: "/report-found", icon: CheckCircle, label: t("tabs.reportFound") },
+    { path: "/check", icon: Search, label: t("tabs.check") },
+    {
+      path: "/notifications",
+      icon: Bell,
+      label: t("tabs.notifications"),
+      badge: unreadCount,
+    },
+    { path: "/statistics", icon: BarChart3, label: t("tabs.statistics") },
+    { path: "/about", icon: Info, label: t("tabs.about") },
+    { path: "/profile", icon: User, label: t("tabs.profile") },
   ];
 
   // Add admin tab if user is admin
   if (isAdmin) {
-    tabs.push({ path: '/admin', icon: Shield, label: t('tabs.admin') });
+    tabs.push({ path: "/admin", icon: Shield, label: t("tabs.admin") });
   }
 
   return (
@@ -38,14 +56,16 @@ export default function MainLayout() {
       {/* Header */}
       <header className="flex items-center justify-between border-b bg-background px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
-          <img 
-            src="/assets/Logo Pasar Digital Community.png" 
-            alt="Logo" 
+          <img
+            src="/assets/Logo Pasar Digital Community.png"
+            alt="Logo"
             className="h-10 w-10"
           />
           <div>
             <h1 className="text-lg font-bold">Pasar Digital Community</h1>
-            <p className="text-xs text-muted-foreground">Anti-Theft Phone Registry</p>
+            <p className="text-xs text-muted-foreground">
+              Anti-Theft Phone Registry
+            </p>
           </div>
         </div>
         <LanguageSwitcher />
@@ -58,7 +78,7 @@ export default function MainLayout() {
 
       {/* Bottom Navigation */}
       <nav className="border-t bg-background">
-        <div className="flex justify-around">
+        <div className="flex overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = isActive(tab.path);
@@ -66,20 +86,22 @@ export default function MainLayout() {
               <Link
                 key={tab.path}
                 to={tab.path}
-                className={`relative flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors ${
+                className={`relative flex min-w-[60px] flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors ${
                   active
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-5 w-5" />
-                <span className="text-[10px]">{tab.label}</span>
+                <span className="text-[10px] text-center leading-tight">
+                  {tab.label}
+                </span>
                 {tab.badge !== undefined && tab.badge > 0 && (
                   <Badge
                     variant="destructive"
                     className="absolute right-1/4 top-1 h-4 min-w-4 px-1 text-[10px]"
                   >
-                    {tab.badge > 99 ? '99+' : tab.badge}
+                    {tab.badge > 99 ? "99+" : tab.badge}
                   </Badge>
                 )}
               </Link>

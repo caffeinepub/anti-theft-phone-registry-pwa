@@ -1,17 +1,17 @@
-import { Button } from '@/components/ui/button';
-import { useTranslation } from '../i18n/useTranslation';
-import { Languages } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
+import { Languages } from "lucide-react";
+import { useTranslation } from "../i18n/useTranslation";
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
-  const changeLanguage = (lng: 'id' | 'en') => {
+  const changeLanguage = (lng: "id" | "en") => {
     i18n.changeLanguage(lng);
   };
 
@@ -25,14 +25,14 @@ export default function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => changeLanguage('id')}
-          className={i18n.language === 'id' ? 'bg-accent' : ''}
+          onClick={() => changeLanguage("id")}
+          className={i18n.language === "id" ? "bg-accent" : ""}
         >
           🇮🇩 Bahasa Indonesia
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => changeLanguage('en')}
-          className={i18n.language === 'en' ? 'bg-accent' : ''}
+          onClick={() => changeLanguage("en")}
+          className={i18n.language === "en" ? "bg-accent" : ""}
         >
           🇬🇧 English
         </DropdownMenuItem>

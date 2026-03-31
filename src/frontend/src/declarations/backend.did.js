@@ -23,7 +23,22 @@ export const AccessState = IDL.Record({
   'isUser' : IDL.Bool,
   'isAdmin' : IDL.Bool,
 });
+export const TokenStatus = IDL.Variant({
+  'revoked' : IDL.Null,
+  'expired' : IDL.Null,
+  'used' : IDL.Null,
+  'unused' : IDL.Null,
+});
 export const Time = IDL.Int;
+export const ActivationTokenInfo = IDL.Record({
+  'status' : TokenStatus,
+  'token' : IDL.Text,
+  'usedAt' : IDL.Opt(Time),
+  'createdAt' : Time,
+  'createdBy' : IDL.Principal,
+  'createdFor' : IDL.Principal,
+  'isUsed' : IDL.Bool,
+});
 export const RSVP = IDL.Record({
   'name' : IDL.Text,
   'inviteCode' : IDL.Text,
@@ -121,10 +136,17 @@ export const idlService = IDL.Service({
   'addPhone' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'checkImei' : IDL.Func([IDL.Text], [IDL.Opt(PhoneStatus)], ['query']),
+  'checkUserActivationStatus' : IDL.Func([], [IDL.Bool], ['query']),
   'clearPin' : IDL.Func([], [], []),
   'deactivateInviteCode' : IDL.Func([IDL.Text], [], []),
+  'generateActivationToken' : IDL.Func([IDL.Principal], [IDL.Text], []),
   'generateInviteCode' : IDL.Func([], [IDL.Text], []),
   'getAccessState' : IDL.Func([], [AccessState], ['query']),
+  'getActivationTokenHistory' : IDL.Func(
+      [],
+      [IDL.Vec(ActivationTokenInfo)],
+      ['query'],
+    ),
   'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
   'getAllTheftReports' : IDL.Func([], [IDL.Vec(TheftReport)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -153,6 +175,7 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'markAllNotificationsAsRead' : IDL.Func([], [], []),
   'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
+  'redeemActivationToken' : IDL.Func([IDL.Text], [], []),
   'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
   'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'releasePhone' : IDL.Func(
@@ -169,7 +192,7 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setOrChangePin' : IDL.Func([IDL.Text], [], []),
   'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
-  'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal], [], []),
+  'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal, IDL.Text], [], []),
   'validatePin' : IDL.Func([IDL.Text], [], []),
 });
 
@@ -191,7 +214,22 @@ export const idlFactory = ({ IDL }) => {
     'isUser' : IDL.Bool,
     'isAdmin' : IDL.Bool,
   });
+  const TokenStatus = IDL.Variant({
+    'revoked' : IDL.Null,
+    'expired' : IDL.Null,
+    'used' : IDL.Null,
+    'unused' : IDL.Null,
+  });
   const Time = IDL.Int;
+  const ActivationTokenInfo = IDL.Record({
+    'status' : TokenStatus,
+    'token' : IDL.Text,
+    'usedAt' : IDL.Opt(Time),
+    'createdAt' : Time,
+    'createdBy' : IDL.Principal,
+    'createdFor' : IDL.Principal,
+    'isUsed' : IDL.Bool,
+  });
   const RSVP = IDL.Record({
     'name' : IDL.Text,
     'inviteCode' : IDL.Text,
@@ -286,10 +324,17 @@ export const idlFactory = ({ IDL }) => {
     'addPhone' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'checkImei' : IDL.Func([IDL.Text], [IDL.Opt(PhoneStatus)], ['query']),
+    'checkUserActivationStatus' : IDL.Func([], [IDL.Bool], ['query']),
     'clearPin' : IDL.Func([], [], []),
     'deactivateInviteCode' : IDL.Func([IDL.Text], [], []),
+    'generateActivationToken' : IDL.Func([IDL.Principal], [IDL.Text], []),
     'generateInviteCode' : IDL.Func([], [IDL.Text], []),
     'getAccessState' : IDL.Func([], [AccessState], ['query']),
+    'getActivationTokenHistory' : IDL.Func(
+        [],
+        [IDL.Vec(ActivationTokenInfo)],
+        ['query'],
+      ),
     'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
     'getAllTheftReports' : IDL.Func([], [IDL.Vec(TheftReport)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -318,6 +363,7 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'markAllNotificationsAsRead' : IDL.Func([], [], []),
     'markNotificationAsRead' : IDL.Func([IDL.Nat], [], []),
+    'redeemActivationToken' : IDL.Func([IDL.Text], [], []),
     'redeemInviteCode' : IDL.Func([IDL.Text], [], []),
     'registerProfile' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'releasePhone' : IDL.Func(
@@ -334,7 +380,7 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setOrChangePin' : IDL.Func([IDL.Text], [], []),
     'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
-    'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal], [], []),
+    'transferOwnership' : IDL.Func([IDL.Text, IDL.Principal, IDL.Text], [], []),
     'validatePin' : IDL.Func([IDL.Text], [], []),
   });
 };

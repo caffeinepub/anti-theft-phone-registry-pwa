@@ -5,9 +5,17 @@
   "login": {
     "title": "Anti-Theft Phone Registration",
     "subtitle": "Protect your phone and prevent stolen phone sales with a trusted registration system",
-    "loginButton": "Login with Internet Identity",
+    "button": "Login with Internet Identity",
     "loggingIn": "Logging in...",
     "secureLogin": "Secure login system using Internet Identity",
+    "feature1Title": "Register Phone",
+    "feature1Desc": "Record your phone ownership with IMEI",
+    "feature2Title": "Report Loss",
+    "feature2Desc": "Report lost or stolen phones quickly",
+    "feature3Title": "Check IMEI Status",
+    "feature3Desc": "Check phone status before buying",
+    "feature4Title": "Safe & Trusted",
+    "feature4Desc": "Data stored securely on blockchain",
     "features": {
       "register": {
         "title": "Register Phone",
@@ -24,6 +32,60 @@
       "secure": {
         "title": "Safe & Trusted",
         "description": "Data stored securely on blockchain"
+      }
+    }
+  },
+  "activation": {
+    "pending": {
+      "title": "Account Awaiting Activation",
+      "subtitle": "Your account needs to be activated by an administrator before you can use the app",
+      "principalLabel": "Your Principal ID",
+      "copyButton": "Copy",
+      "copiedButton": "Copied!",
+      "instructions": "Send your Principal ID to the administrator to receive an activation token",
+      "tokenLabel": "Activation Token",
+      "tokenPlaceholder": "Enter activation token from admin",
+      "redeemButton": "Activate Account",
+      "redeeming": "Activating...",
+      "contactAdmin": "Contact admin at",
+      "success": "Account activated successfully!",
+      "error": "Invalid or already used token"
+    }
+  },
+  "admin": {
+    "activation": {
+      "title": "User Activation",
+      "subtitle": "Manage user account activation with tokens",
+      "generateSection": "Generate Activation Token",
+      "principalLabel": "User Principal ID",
+      "principalPlaceholder": "Enter the Principal ID of the user to activate",
+      "generateButton": "Generate Token",
+      "generating": "Generating...",
+      "tokenGenerated": "Activation Token Generated",
+      "tokenLabel": "Token",
+      "copyToken": "Copy Token",
+      "tokenCopied": "Token copied!",
+      "sendInstructions": "Send this token to the user to activate their account",
+      "historySection": "Token History",
+      "historyEmpty": "No tokens generated yet",
+      "historyColumns": {
+        "token": "Token",
+        "createdFor": "Created For",
+        "createdAt": "Created At",
+        "status": "Status",
+        "usedAt": "Used At"
+      },
+      "status": {
+        "unused": "Unused",
+        "used": "Used",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "refreshButton": "Refresh",
+      "error": {
+        "invalidPrincipal": "Invalid Principal ID",
+        "generateFailed": "Failed to generate token",
+        "loadFailed": "Failed to load token history"
       }
     }
   },
@@ -127,10 +189,14 @@
     "unauthorizedRelease": "Only the phone owner can release ownership",
     "reportSubmitted": "Report submitted successfully",
     "reportFailed": "Failed to submit report",
-    "foundReportSubmitted": "Found report submitted successfully! The owner will be notified.",
+    "foundReportSubmitted": "Found report submitted successfully! Owner will be notified.",
     "notificationMarkFailed": "Failed to mark notification",
     "allNotificationsRead": "All notifications marked as read",
-    "notificationsMarkFailed": "Failed to mark notifications"
+    "notificationsMarkFailed": "Failed to mark notifications",
+    "tokenGenerated": "Activation token generated successfully",
+    "tokenGenerateFailed": "Failed to generate activation token",
+    "tokenRedeemed": "Token redeemed successfully! Your account is now active.",
+    "tokenRedeemFailed": "Failed to redeem token"
   },
   "footer": {
     "copyright": "© 2026 Pasar Digital Community"

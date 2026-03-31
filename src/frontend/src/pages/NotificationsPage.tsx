@@ -1,16 +1,24 @@
-import { useGetNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCircle, Info, AlertTriangle, CheckCheck } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { NotificationType } from '../backend';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatDistanceToNow } from "date-fns";
+import { id } from "date-fns/locale";
+import {
+  AlertTriangle,
+  Bell,
+  CheckCheck,
+  CheckCircle,
+  Info,
+} from "lucide-react";
+import { NotificationType } from "../backend";
+import {
+  useGetNotifications,
+  useMarkAllNotificationsAsRead,
+  useMarkNotificationAsRead,
+} from "../hooks/useQueries";
 
 export default function NotificationsPage() {
-  const { identity } = useInternetIdentity();
-  const { data: notifications = [], isLoading } = useGetNotifications(identity?.getPrincipal());
+  const { data: notifications = [], isLoading } = useGetNotifications();
   const markAsRead = useMarkNotificationAsRead();
   const markAllAsRead = useMarkAllNotificationsAsRead();
 
@@ -35,17 +43,17 @@ export default function NotificationsPage() {
   const getBorderColor = (type: NotificationType) => {
     switch (type) {
       case NotificationType.success:
-        return 'border-l-green-500';
+        return "border-l-green-500";
       case NotificationType.info:
-        return 'border-l-blue-500';
+        return "border-l-blue-500";
       case NotificationType.warning:
-        return 'border-l-orange-500';
+        return "border-l-orange-500";
       default:
-        return 'border-l-blue-500';
+        return "border-l-blue-500";
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -56,12 +64,14 @@ export default function NotificationsPage() {
             <div>
               <h1 className="text-2xl font-bold">Notifikasi</h1>
               <p className="mt-1 text-sm text-blue-100">
-                {unreadCount > 0 ? `${unreadCount} notifikasi belum dibaca` : 'Semua notifikasi sudah dibaca'}
+                {unreadCount > 0
+                  ? `${unreadCount} notifikasi belum dibaca`
+                  : "Semua notifikasi sudah dibaca"}
               </p>
             </div>
-            <img 
-              src="/assets/generated/notification-bell-icon-transparent.dim_64x64.png" 
-              alt="Notification Icon" 
+            <img
+              src="/assets/generated/notification-bell-icon-transparent.dim_64x64.png"
+              alt="Notification Icon"
               className="h-12 w-12"
             />
           </div>
@@ -87,8 +97,8 @@ export default function NotificationsPage() {
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent className="p-6">
-                  <div className="h-4 w-3/4 rounded bg-muted"></div>
-                  <div className="mt-2 h-3 w-1/2 rounded bg-muted"></div>
+                  <div className="h-4 w-3/4 rounded bg-muted" />
+                  <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
                 </CardContent>
               </Card>
             ))}
@@ -108,22 +118,33 @@ export default function NotificationsPage() {
               <Card
                 key={notification.id.toString()}
                 className={`border-l-4 shadow-md transition-all hover:shadow-lg ${getBorderColor(notification.notifType)} ${
-                  !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                  !notification.isRead
+                    ? "bg-blue-50/50 dark:bg-blue-950/20"
+                    : ""
                 }`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 pt-1">{getIcon(notification.notifType)}</div>
+                    <div className="flex-shrink-0 pt-1">
+                      {getIcon(notification.notifType)}
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-foreground">{notification.title}</h3>
+                        <h3 className="font-semibold text-foreground">
+                          {notification.title}
+                        </h3>
                         {!notification.isRead && (
-                          <Badge variant="default" className="flex-shrink-0 text-xs">
+                          <Badge
+                            variant="default"
+                            className="flex-shrink-0 text-xs"
+                          >
                             Baru
                           </Badge>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
                       {notification.relatedIMEI && (
                         <p className="mt-2 text-xs text-muted-foreground">
                           IMEI: {notification.relatedIMEI}

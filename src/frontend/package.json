@@ -4,41 +4,28 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "pnpm i && dfx canister create backend && dfx generate backend && dfx deploy",
-    "start": "vite --port 3000",
-    "prebuild": "dfx generate backend",
     "build:skip-bindings": "vite build && pnpm copy:env",
+    "build": "vite build && pnpm copy:env",
     "copy:env": "cp env.json dist/",
-    "typescript-check": "tsc --noEmit --pretty",
-    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\"",
-    "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix"
+    "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsconfig.tsbuildinfo --pretty",
+    "check": "biome check src",
+    "fix": "biome check --write src"
   },
   "devDependencies": {
-    "@eslint/js": "~9.27.0",
+    "@biomejs/biome": "^1.9.0",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@react-three/eslint-plugin": "~0.1.2",
     "@types/node": "^20.9.0",
     "@types/react": "~19.1.0",
     "@types/react-dom": "~19.1.0",
     "@types/three": "0.176.0",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@typescript-eslint/parser": "^8.32.1",
-    "@typescript-eslint/utils": "^8.32.1",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "dotenv": "^16.5.0",
     "dotenv-cli": "^8.0.0",
-    "eslint": "~9.27.0",
-    "eslint-plugin-react": "~7.37.5",
-    "eslint-plugin-react-hooks": "~5.2.0",
-    "eslint-plugin-tailwindcss": "~3.18.2",
-    "globals": "~16.2.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.17",
     "@tailwindcss/typography": "0.5.10",
     "tailwindcss-animate": "^1.0.7",
-    "@tanstack/eslint-plugin-router": "~1.115.0",
     "typescript": "^5.8.3",
     "vite": "^5.4.1",
     "vite-plugin-environment": "^1.1.3"
@@ -102,6 +89,7 @@
     "react-dom": "~19.1.0",
     "react-quill-new": "3.4.6",
     "three": "^0.176.0",
-    "zustand": "~5.0.5"
+    "zustand": "~5.0.5",
+    "motion": "^12.34.3"
   }
 }

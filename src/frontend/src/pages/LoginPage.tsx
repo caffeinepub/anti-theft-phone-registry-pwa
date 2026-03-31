@@ -1,102 +1,164 @@
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { Button } from '@/components/ui/button';
-import { Loader2, Shield, Smartphone, Search, AlertTriangle } from 'lucide-react';
-import LanguageSwitcher from '../components/LanguageSwitcher';
-import { useTranslation } from '../i18n/useTranslation';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Bell, Search, Shield, Smartphone } from "lucide-react";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useTranslation } from "../i18n/useTranslation";
 
 export default function LoginPage() {
   const { login, loginStatus } = useInternetIdentity();
   const { t } = useTranslation();
 
-  const isLoggingIn = loginStatus === 'logging-in';
+  const isLoggingIn = loginStatus === "logging-in";
+
+  const handleLogin = async () => {
+    try {
+      await login();
+    } catch (error: any) {
+      console.error("Login error:", error);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        {/* Language Switcher */}
-        <div className="absolute right-4 top-4">
-          <LanguageSwitcher />
-        </div>
-
-        {/* Hero Section with Logo */}
-        <div className="mb-12 text-center">
-          <div className="mb-6 flex justify-center">
-            <img 
-              src="/assets/Logo Pasar Digital Community.png" 
-              alt="Pasar Digital Community Logo" 
-              className="h-24 w-24 rounded-full shadow-lg"
-            />
-          </div>
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl">
-            {t('login.title')}
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-            {t('login.subtitle')}
-          </p>
-        </div>
-
-        {/* Features Grid */}
-        <div className="mb-12 grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl bg-white p-6 text-center shadow-lg dark:bg-gray-800">
-            <Smartphone className="mx-auto mb-3 h-10 w-10 text-blue-600" />
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">{t('login.features.register.title')}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('login.features.register.description')}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 text-center shadow-lg dark:bg-gray-800">
-            <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-red-600" />
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">{t('login.features.report.title')}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('login.features.report.description')}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 text-center shadow-lg dark:bg-gray-800">
-            <Search className="mx-auto mb-3 h-10 w-10 text-green-600" />
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">{t('login.features.check.title')}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('login.features.check.description')}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 text-center shadow-lg dark:bg-gray-800">
-            <Shield className="mx-auto mb-3 h-10 w-10 text-purple-600" />
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">{t('login.features.secure.title')}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('login.features.secure.description')}
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <img
+            src="/assets/Logo Pasar Digital Community.png"
+            alt="Logo"
+            className="h-12 w-12"
+          />
+          <div>
+            <h1 className="text-xl font-bold text-amber-900 dark:text-amber-100">
+              Pasar Digital Community
+            </h1>
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Anti-Theft Phone Registry
             </p>
           </div>
         </div>
+        <LanguageSwitcher />
+      </header>
 
-        {/* Login Button */}
-        <div className="w-full max-w-md">
-          <Button
-            onClick={login}
-            disabled={isLoggingIn}
-            size="lg"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-lg font-semibold shadow-xl hover:from-blue-700 hover:to-indigo-700"
+      {/* Main Content */}
+      <main className="flex flex-1 items-center justify-center p-4">
+        <div className="w-full max-w-4xl space-y-8">
+          {/* Hero Section */}
+          <div className="text-center space-y-4">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 shadow-lg">
+              <Shield className="h-10 w-10 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h2 className="text-4xl font-bold text-amber-900 dark:text-amber-100">
+              {t("login.title")}
+            </h2>
+            <p className="text-lg text-amber-700 dark:text-amber-300 max-w-2xl mx-auto">
+              {t("login.subtitle")}
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="border-amber-200 dark:border-amber-900 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+              <CardHeader className="space-y-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <Smartphone className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <CardTitle className="text-lg text-amber-900 dark:text-amber-100">
+                  {t("login.feature1Title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-amber-700 dark:text-amber-300">
+                  {t("login.feature1Desc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-200 dark:border-amber-900 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+              <CardHeader className="space-y-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <Shield className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <CardTitle className="text-lg text-amber-900 dark:text-amber-100">
+                  {t("login.feature2Title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-amber-700 dark:text-amber-300">
+                  {t("login.feature2Desc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-200 dark:border-amber-900 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+              <CardHeader className="space-y-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <Search className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <CardTitle className="text-lg text-amber-900 dark:text-amber-100">
+                  {t("login.feature3Title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-amber-700 dark:text-amber-300">
+                  {t("login.feature3Desc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-200 dark:border-amber-900 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+              <CardHeader className="space-y-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <Bell className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <CardTitle className="text-lg text-amber-900 dark:text-amber-100">
+                  {t("login.feature4Title")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-amber-700 dark:text-amber-300">
+                  {t("login.feature4Desc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Login Button */}
+          <div className="flex justify-center">
+            <Button
+              onClick={handleLogin}
+              disabled={isLoggingIn}
+              size="lg"
+              className="bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-700 dark:hover:bg-amber-600 px-8 py-6 text-lg font-semibold shadow-lg"
+            >
+              {isLoggingIn ? t("login.loggingIn") : t("login.button")}
+            </Button>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-amber-200 dark:border-amber-900 bg-white/50 dark:bg-gray-950/50 backdrop-blur p-4 text-center text-sm text-amber-700 dark:text-amber-300">
+        <p>
+          © {new Date().getFullYear()} Pasar Digital Community. Built with ❤️
+          using{" "}
+          <a
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-amber-600 dark:text-amber-400 hover:underline"
           >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {t('login.loggingIn')}
-              </>
-            ) : (
-              t('login.loginButton')
-            )}
-          </Button>
-          <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            {t('login.secureLogin')}
-          </p>
-        </div>
-
-        {/* Footer */}
-        <footer className="mt-16 text-center text-sm text-gray-600 dark:text-gray-400">
-          <p>{t('footer.copyright')}</p>
-        </footer>
-      </div>
+            caffeine.ai
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
